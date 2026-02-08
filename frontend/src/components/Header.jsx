@@ -90,29 +90,64 @@ export default function Header() {
                 </div>
             </header>
 
-            {/* Mobile Menu */}
-            <div className={`mobile-menu ${mobileMenuOpen ? 'is-open' : ''}`} style={{ zIndex: 1001 }}>
-                <nav className="flex flex-col gap-4">
-                    <button onClick={() => scrollToSection('about')} className="nav__link text-left">О нас</button>
-                    <button onClick={() => scrollToSection('services')} className="nav__link text-left">Услуги</button>
-                    <button onClick={() => scrollToSection('projects')} className="nav__link text-left">Проекты</button>
-                    <button onClick={() => scrollToSection('contact')} className="nav__link text-left">Карьера</button>
-                </nav>
-                <div className="mt-8 flex flex-col gap-4">
-                    {user ? (
-                        <>
-                            <Link to="/profile" className="btn btn--gold w-full text-center">
-                                Профиль
+            {/* Mobile Menu Overlay */}
+            <div
+                className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] transition-opacity duration-300 lg:hidden ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Mobile Menu Sidebar */}
+            <div
+                className={`fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-white shadow-2xl z-[1001] transform transition-transform duration-300 lg:hidden ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            >
+                <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                        <span className="font-bold text-lg">Меню</span>
+                        <button onClick={() => setMobileMenuOpen(false)} className="p-2 -mr-2 text-slate-500 hover:text-slate-900">
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    <nav className="flex-1 overflow-y-auto py-6 px-6 flex flex-col gap-2">
+                        <button onClick={() => scrollToSection('about')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">О нас</button>
+                        <button onClick={() => scrollToSection('services')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">Услуги</button>
+                        <button onClick={() => scrollToSection('projects')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">Проекты</button>
+                        <button onClick={() => scrollToSection('contact')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">Карьера</button>
+                    </nav>
+
+                    <div className="p-6 border-t border-slate-100 space-y-4 bg-slate-50">
+                        {user ? (
+                            <>
+                                <Link
+                                    to="/profile"
+                                    className="flex items-center justify-center w-full py-3 px-4 bg-[#7C3AED] text-white rounded-xl font-semibold shadow-lg shadow-purple-200"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Профиль
+                                </Link>
+                                <button
+                                    onClick={() => { logout(); setMobileMenuOpen(false); }}
+                                    className="w-full py-3 px-4 text-slate-600 font-medium hover:text-red-500 transition-colors"
+                                >
+                                    Выйти
+                                </button>
+                            </>
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="flex items-center justify-center w-full py-3 px-4 bg-[#7C3AED] text-white rounded-xl font-semibold shadow-lg shadow-purple-200"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Войти
                             </Link>
-                            <Button onClick={logout} variant="ghost" className="w-full">
-                                Выйти
-                            </Button>
-                        </>
-                    ) : (
-                        <Link to="/login" className="btn btn--gold w-full text-center">
-                            Войти
-                        </Link>
-                    )}
+                        )}
+                        <button
+                            onClick={() => scrollToSection('footer-form')}
+                            className="w-full py-3 px-4 border-2 border-[#7C3AED] text-[#7C3AED] rounded-xl font-semibold hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                        >
+                            Оставить заявку <ArrowRight className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
