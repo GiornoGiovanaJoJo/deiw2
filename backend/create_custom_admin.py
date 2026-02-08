@@ -15,22 +15,29 @@ if str(backend_dir) not in sys.path:
 try:
     from app.core.config import settings
     from app.core.security import get_password_hash
-    from app.db.session import SessionLocal
+    from app.db.session import SessionLocal, engine
     from app.models.user import User
+    from app.db.base import Base
 except ImportError as e:
     print(f"Error importing app modules: {e}")
     # Fallback to parent dir if needed (for some environments)
     sys.path.insert(0, str(backend_dir.parent))
     from backend.app.core.config import settings
     from backend.app.core.security import get_password_hash
-    from backend.app.db.session import SessionLocal
+    from backend.app.db.session import SessionLocal, engine
     from backend.app.models.user import User
+    from backend.app.db.base import Base
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def create_or_update_admin():
+    # Ensure tables exist
+    logger.info("Ensuring database tables exist...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables verified.")
+
     target_email = "granpainside@yandex.ru"
     target_password = "Nikitoso02-"
     
