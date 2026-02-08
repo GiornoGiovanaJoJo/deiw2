@@ -12,6 +12,7 @@ import {
     FolderKanban,
     Package,
     QrCode,
+    MessageSquare,
     Clock,
     DollarSign,
     Building2
@@ -31,6 +32,8 @@ export default function Layout() {
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro'] },
         { name: 'Projekte', path: '/projects', icon: FolderKanban, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Worker'] },
+        { name: 'Aufgaben', path: '/tasks', icon: Briefcase, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro', 'Worker'] },
+        { name: 'Support', path: '/support', icon: MessageSquare, roles: ['Admin', 'Projektleiter', 'Büro'] },
         { name: 'Kunden', path: '/customers', icon: Users, roles: ['Admin', 'Projektleiter', 'Büro'] },
         { name: 'Lager', path: '/warehouse', icon: Package, roles: ['Admin', 'Projektleiter', 'Büro', 'Warehouse'] },
         { name: 'Terminal', path: '/terminal', icon: QrCode, roles: ['Admin', 'Projektleiter', 'Büro', 'Warehouse', 'Worker'] },

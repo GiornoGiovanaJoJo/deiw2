@@ -1,42 +1,50 @@
-from typing import Optional
+from typing import Optional, List
 from datetime import date
 from pydantic import BaseModel
+from app.schemas.user import User
+from app.schemas.subcontractor import Subcontractor
 
 class ProjectBase(BaseModel):
     name: str
     description: Optional[str] = None
     status: Optional[str] = "Geplant"
+    priority: Optional[str] = "Mittel"
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     projekt_nummer: Optional[str] = None
-
-class ProjectCreate(ProjectBase):
     budget: Optional[float] = 0.0
+    address: Optional[str] = None
+    photos: Optional[List[str]] = []
+    
     customer_id: Optional[int] = None
     category_id: Optional[int] = None
+    projektleiter_id: Optional[int] = None
+
+class ProjectCreate(ProjectBase):
+    gruppenleiter_ids: Optional[List[int]] = []
+    worker_ids: Optional[List[int]] = []
+    subcontractor_ids: Optional[List[int]] = []
 
 class ProjectUpdate(ProjectBase):
     name: Optional[str] = None
-    budget: Optional[float] = None
-    customer_id: Optional[int] = None
-    category_id: Optional[int] = None
+    gruppenleiter_ids: Optional[List[int]] = None
+    worker_ids: Optional[List[int]] = None
+    subcontractor_ids: Optional[List[int]] = None
 
 class ProjectInDBBase(ProjectBase):
     id: int
-    budget: Optional[float] = 0.0
-    customer_id: Optional[int] = None
-    category_id: Optional[int] = None
-
+    
     class Config:
         from_attributes = True
 
 class Project(ProjectInDBBase):
-    pass
+    projektleiter: Optional[User] = None
+    gruppenleiter: List[User] = []
+    workers: List[User] = []
+    subcontractors: List[Subcontractor] = []
 
 class ProjectPublic(ProjectBase):
     id: int
-    # Exclude budget and internal IDs for public view if desired, 
-    # but based on previous errors/requirements, we'll keep basic info.
-    # Adjust as needed. For now, public view might want to hide budget.
+    # Simplified public view
     class Config:
         from_attributes = True

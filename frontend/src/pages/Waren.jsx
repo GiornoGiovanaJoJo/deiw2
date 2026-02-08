@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from 'react-router-dom';
 import { clientApi } from "@/api/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2, Package, AlertTriangle, Barcode, X, TrendingUp } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Package, AlertTriangle, Barcode, X, TrendingUp, History, DollarSign } from "lucide-react";
 // import { toast } from "sonner"; // Assuming sonner is not installed, use simple alert or console for now, or install it.
 
 const EINHEITEN = ["Stk", "kg", "m", "l", "m²", "m³", "Set"];
@@ -221,6 +222,16 @@ export default function Waren() {
                     <p className="text-slate-500 mt-1">Artikelstamm und Lagerbestände verwalten</p>
                 </div>
                 <div className="flex items-center gap-3">
+                    <Link to="/warehouse/logs">
+                        <Button variant="outline">
+                            <History className="w-4 h-4 mr-2" /> Protokoll
+                        </Button>
+                    </Link>
+                    <Link to="/warehouse/cash-register">
+                        <Button variant="outline">
+                            <DollarSign className="w-4 h-4 mr-2" /> Kassa
+                        </Button>
+                    </Link>
                     {lowStockCount > 0 && (
                         <Badge className="bg-amber-100 text-amber-700 flex items-center gap-1">
                             <AlertTriangle className="w-3 h-3" />

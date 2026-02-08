@@ -1,15 +1,41 @@
 import api from './axios';
 
 export const clientApi = {
-    getMyProjects: async () => {
-        // Fetch real projects for the current user
+    getProjects: async () => {
         return api.get('/projects/');
+    },
+    getProjectById: async (id) => {
+        return api.get(`/projects/${id}`);
+    },
+    createProject: async (data) => {
+        return api.post('/projects/', data);
+    },
+    updateProject: async (id, data) => {
+        return api.put(`/projects/${id}`, data);
+    },
+    deleteProject: async (id) => {
+        return api.delete(`/projects/${id}`);
     },
     getMyTasks: async () => {
         return api.get('/tasks/');
     },
+    createTask: async (data) => {
+        return api.post('/tasks/', data);
+    },
+    updateTask: async (id, data) => {
+        return api.put(`/tasks/${id}`, data);
+    },
+    deleteTask: async (id) => {
+        return api.delete(`/tasks/${id}`);
+    },
     getAllUsers: async () => {
         return api.get('/users/');
+    },
+    createUser: async (data) => {
+        return api.post('/users/', data);
+    },
+    deleteUser: async (id) => {
+        return api.delete(`/users/${id}`);
     },
     getDashboardStats: async () => {
         const [projectsStats, tasksStats, usersData, projectsList] = await Promise.all([

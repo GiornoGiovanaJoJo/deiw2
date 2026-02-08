@@ -14,6 +14,13 @@ import Terminal from '@/pages/Terminal';
 import Zeiterfassung from '@/pages/Zeiterfassung';
 import Finance from '@/pages/Finance';
 import Subcontractors from '@/pages/Subcontractors';
+import Projects from '@/pages/Projects';
+import ProjectNew from '@/pages/ProjectNew';
+import ProjectDetailsAdmin from '@/pages/ProjectDetailsAdmin';
+import Tasks from '@/pages/Tasks';
+import Support from '@/pages/Support';
+import ProductLogs from '@/pages/ProductLogs';
+import CashRegister from '@/pages/CashRegister';
 
 
 
@@ -41,14 +48,21 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro', 'Worker']} />}>
             <Route element={<Layout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/support" element={<Support />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/warehouse" element={<Waren />} />
+              <Route path="/warehouse/logs" element={<ProductLogs />} />
+              <Route path="/warehouse/cash-register" element={<CashRegister />} />
               <Route path="/terminal" element={<Terminal />} />
               <Route path="/time-tracking" element={<Zeiterfassung />} />
               <Route path="/finance" element={<Finance />} />
               <Route path="/subcontractors" element={<Subcontractors />} />
-              {/* <Route path="/projects" element={<Projects />} /> */}
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/projects/new" element={<ProjectNew />} />
+              <Route path="/projects/:id" element={<ProjectDetailsAdmin />} />
+              <Route path="/projects/:id/edit" element={<ProjectNew />} />
 
 
 

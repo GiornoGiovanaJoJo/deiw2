@@ -39,7 +39,8 @@ def create_user(
     # But for development ease, I'll allow open registration on a separate endpoint or just here if I remove dependency.
     # Actually, let's make this an admin-only endpoint effectively, and add a open registration if needed.
     # For now, I'll restrict it. To create the FIRST user (admin), we'll use a script.
-    if not current_user.is_superuser:
+    # Allow Admin to create users
+    if not current_user.is_superuser and current_user.role != "Admin":
         raise HTTPException(status_code=400, detail="Not enough permissions")
 
     user = db.query(User).filter(User.email == user_in.email).first()
@@ -175,3 +176,29 @@ def read_user_me(
     Get current user.
     """
     return current_user
+
+@router.delete("/{user_id}", response_model=UserSchema)
+def delete_user(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_id: int,
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Delete a user. Admin only.
+    """
+    if not current_user.is_superuser and current_user.role != "Admin":
+        raise HTTPException(
+            status_code=400, detail="The user doesn't have enough privileges"
+        )
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="The user with this id does not exist in the system",
+        )
+    
+    db.delete(user)
+    db.commit()
+    return user
