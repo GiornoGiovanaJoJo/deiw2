@@ -21,6 +21,9 @@ export const clientApi = {
         // ownerOnly=true forces backend to return only projects where user is assigned
         return api.get(`/projects/?owner_only=${ownerOnly}`);
     },
+    getMyTasks: async () => {
+        return api.get('/tasks/');
+    },
     // ... (other methods)
     uploadImage: async (file) => {
         const formData = new FormData();

@@ -59,7 +59,7 @@ export default function ProjectDetails() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-white font-sans text-slate-900">
+        <div className="min-h-screen flex flex-col bg-white font-sans text-slate-900 landing-page">
             <Header />
 
             <main className="flex-1">
