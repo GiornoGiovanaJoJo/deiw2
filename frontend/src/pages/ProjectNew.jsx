@@ -269,6 +269,47 @@ export default function ProjectNew() {
                             />
                         </div>
 
+                        <div className="space-y-2">
+                            <Label htmlFor="image">Projektbild</Label>
+                            <Input
+                                id="image"
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                    const file = e.target.files[0];
+                                    if (!file) return;
+
+                                    try {
+                                        setLoading(true);
+                                        const res = await clientApi.uploadImage(file);
+                                        // backend returns { url: "..." }
+                                        // We store it in photos array as backend expects list of strings
+                                        setForm(prev => ({
+                                            ...prev,
+                                            photos: [res.data.url]
+                                        }));
+                                    } catch (err) {
+                                        console.error("Upload failed", err);
+                                        alert("Fehler beim Hochladen des Bildes");
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }}
+                            />
+                            {form.photos && form.photos.length > 0 && (
+                                <div className="mt-2 relative w-full h-48 bg-slate-100 rounded-md overflow-hidden">
+                                    <img src={form.photos[0]} alt="Preview" className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                                        onClick={() => setForm(prev => ({ ...prev, photos: [] }))}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="flex justify-end gap-3 pt-4">
                             <Link to={isEditMode ? `/projects/${id}` : "/projects"}>
                                 <Button variant="outline" type="button">Abbrechen</Button>

@@ -8,9 +8,9 @@ export default function ProjectCard({ project }) {
             <article className="project-card h-full flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-100">
                 {/* Image */}
                 <div className="project-card__img relative overflow-hidden h-64 bg-slate-200">
-                    {project.foto ? (
+                    {(project.photos && project.photos.length > 0) || project.foto ? (
                         <img
-                            src={project.foto}
+                            src={(project.photos && project.photos.length > 0) ? project.photos[0] : project.foto}
                             alt={project.name}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
@@ -20,7 +20,7 @@ export default function ProjectCard({ project }) {
                         </div>
                     )}
 
-                    {!project.foto && (
+                    {(!project.photos || project.photos.length === 0) && !project.foto && (
                         <div className="absolute inset-0 flex items-center justify-center">
                             <span className="text-slate-500 text-sm font-medium px-4 text-center">{project.name}</span>
                         </div>

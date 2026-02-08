@@ -53,6 +53,7 @@ def read_projects(
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(deps.get_current_active_user),
+    owner_only: bool = False,
 ) -> Any:
     """
     Retrieve projects with role-based filtering.
@@ -60,7 +61,19 @@ def read_projects(
     query = db.query(Projekt)
     
     # Filter based on user role
-    if current_user.role in [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.OFFICE]:
+    if owner_only:
+        # User explicitly requests only THEIR projects
+        # This is useful for Profile page where even Admins want to see "My Projects"
+        from sqlalchemy import or_
+        query = query.filter(
+            or_(
+                Projekt.projektleiter_id == current_user.id,
+                Projekt.gruppenleiter.any(id=current_user.id),
+                Projekt.workers.any(id=current_user.id),
+                # Note: Subcontractors are not Users, so we don't check via current_user.id directly unless mapped
+            )
+        )
+    elif current_user.role in [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.OFFICE]:
         # See all projects
         pass
     elif current_user.role == UserRole.GROUP_LEADER:

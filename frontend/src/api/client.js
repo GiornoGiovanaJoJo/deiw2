@@ -1,9 +1,10 @@
 import api from './axios';
 
 export const clientApi = {
-    getProjects: async () => {
-        return api.get('/projects/');
+    getProjects: async (ownerOnly = false) => {
+        return api.get(`/projects/?owner_only=${ownerOnly}`);
     },
+
     getProjectById: async (id) => {
         return api.get(`/projects/${id}`);
     },
@@ -16,8 +17,19 @@ export const clientApi = {
     deleteProject: async (id) => {
         return api.delete(`/projects/${id}`);
     },
-    getMyTasks: async () => {
-        return api.get('/tasks/');
+    getMyProjects: async (ownerOnly = false) => {
+        // ownerOnly=true forces backend to return only projects where user is assigned
+        return api.get(`/projects/?owner_only=${ownerOnly}`);
+    },
+    // ... (other methods)
+    uploadImage: async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.post('/upload/image', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
     },
     createTask: async (data) => {
         return api.post('/tasks/', data);

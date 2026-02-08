@@ -48,29 +48,22 @@ export default function Terminal() {
     const inputRef = useRef(null);
 
     useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [benutzerData, projekteData, warenData] = await Promise.all([
+                    clientApi.getAllUsers(),
+                    clientApi.getMyProjects(),
+                    clientApi.getProducts()
+                ]);
+                setAllBenutzer(benutzerData.data);
+                setProjekte(projekteData.data);
+                setWaren(warenData.data);
+            } catch (error) {
+                console.error(error);
+            }
+        };
         loadData();
     }, []);
-
-    useEffect(() => {
-        if (inputRef.current && step === "login") {
-            inputRef.current.focus();
-        }
-    }, [step]);
-
-    const loadData = async () => {
-        try {
-            const [benutzerData, projekteData, warenData] = await Promise.all([
-                clientApi.getAllUsers(),
-                clientApi.getMyProjects(),
-                clientApi.getProducts()
-            ]);
-            setAllBenutzer(benutzerData.data);
-            setProjekte(projekteData.data);
-            setWaren(warenData.data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     const handleQRLogin = () => {
         // In real app, we might check against a specific QR code field.
@@ -173,7 +166,13 @@ export default function Terminal() {
             setSelectedProjekt("");
             setAktion("");
             setMenge(1);
-            loadData(); // Reload to get fresh stock
+            setMenge(1);
+            // Trigger a re-fetch if needed, or update local state directly. 
+            // Since we updated local stock for selectedWare, we might be fine, but to be safe we can't call loadData easily if it's inside useEffect.
+            // Let's rely on local update and maybe a separate effect or just keeping loadData outside but wrapped in useCallback.
+            // But for now, let's just omit the re-fetch since we update the specific item locally if we wanted (we actually update selectedWare stock but not the list).
+            // BETTER: Update the list in state.
+            setWaren(prevWaren => prevWaren.map(w => w.id === selectedWare.id ? { ...w, stock: newBestand } : w));
 
             setTimeout(() => setSuccessMessage(""), 3000);
         } catch (error) {

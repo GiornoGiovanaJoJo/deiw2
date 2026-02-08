@@ -65,9 +65,9 @@ export default function ProjectDetails() {
             <main className="flex-1">
                 {/* Hero Section */}
                 <div className="relative h-[60vh] bg-slate-900">
-                    {project.foto ? (
+                    {(project.photos && project.photos.length > 0) || project.foto ? (
                         <img
-                            src={project.foto}
+                            src={(project.photos && project.photos.length > 0) ? project.photos[0] : project.foto}
                             alt={project.name}
                             className="w-full h-full object-cover opacity-60"
                         />

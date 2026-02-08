@@ -54,7 +54,7 @@ export default function Profile() {
         try {
             setLoading(true);
             const [myProjects] = await Promise.all([
-                clientApi.getMyProjects()
+                clientApi.getMyProjects(true) // Pass true to filter by owner/assignment
             ]);
             setOrders(myProjects.data || []);
             setRequests([]); // clientApi.getMyRequests() is not implemented yet
