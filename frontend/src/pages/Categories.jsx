@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Folder, Plus, Trash2 } from "lucide-react";
 import {
     Select,
     SelectContent,
