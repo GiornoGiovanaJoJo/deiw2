@@ -13,7 +13,35 @@ def read_tickets(
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
-    return db.query(Ticket).offset(skip).limit(limit).all()
+    tickets = db.query(Ticket).offset(skip).limit(limit).all()
+    return tickets
+
+@router.post("/public", response_model=TicketSchema)
+def create_public_ticket(
+    *,
+    db: Session = Depends(deps.get_db),
+    ticket_in: TicketCreate,
+) -> Any:
+    """
+    Create new ticket (public access).
+    """
+    ticket = Ticket(
+        subject=ticket_in.subject,
+        message=ticket_in.message,
+        sender_name=ticket_in.sender_name,
+        sender_email=ticket_in.sender_email,
+        sender_phone=ticket_in.sender_phone,
+        category=ticket_in.category,
+        status=TicketStatus.NEW,
+        priority=TicketPriority.MEDIUM,
+        service_id=ticket_in.service_id,
+        booking_date=ticket_in.booking_date,
+        source=ticket_in.source
+    )
+    db.add(ticket)
+    db.commit()
+    db.refresh(ticket)
+    return ticket
 
 @router.post("/", response_model=TicketSchema)
 def create_ticket(

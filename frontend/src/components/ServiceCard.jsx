@@ -1,14 +1,17 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
 
-export default function ServiceCard({ category }) {
+export default function ServiceCard({ category, onClick }) {
     // Parse description if it's a list (bullet points)
     const features = category.description
         ? category.description.split('\n').filter(line => line.trim().length > 0)
         : [];
 
     return (
-        <article className="service-card h-full flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100">
+        <article
+            onClick={onClick}
+            className="service-card h-full flex flex-col bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100 cursor-pointer group"
+        >
             <div className="service-card__img min-h-[160px] bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center relative overflow-hidden group">
                 {/* Placeholder gradient/image logic - migrated from CSS if needed or kept simple */}
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>

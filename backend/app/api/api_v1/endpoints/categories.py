@@ -20,6 +20,18 @@ def read_categories(
     categories = db.query(Category).offset(skip).limit(limit).all()
     return categories
 
+@router.get("/public", response_model=List[CategorySchema])
+def read_public_categories(
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
+) -> Any:
+    """
+    Retrieve categories for public access.
+    """
+    categories = db.query(Category).offset(skip).limit(limit).all()
+    return categories
+
 @router.post("/", response_model=CategorySchema)
 def create_category(
     *,

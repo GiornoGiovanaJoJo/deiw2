@@ -14,192 +14,43 @@ import ProjectCard from "@/components/ProjectCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+import ServiceModal from "@/components/ServiceModal";
+
 export default function Home() {
     const [scrolled, setScrolled] = useState(false);
     const [currentService, setCurrentService] = useState(0);
     const [visibleServices, setVisibleServices] = useState(1);
+
+    // Modal State
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Dynamic Data State
     const [services, setServices] = useState([]);
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Project Pagination
-    const [projectPage, setProjectPage] = useState(0);
-    const projectsPerPage = 3;
+    // ... (existing code)
 
-    const navigate = useNavigate();
-
-    // Data Fetching
-    useEffect(() => {
-        const loadPublicData = async () => {
-            try {
-                const [cats, projs] = await Promise.all([
-                    publicApi.getCategories(50),
-                    publicApi.getProjects(50)
-                ]);
-                setServices(cats || []);
-                setProjects(projs || []);
-            } catch (error) {
-                console.error("Failed to load public data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadPublicData();
-    }, []);
-
-    // Scroll effect for header
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    // Resize listener for services carousel
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth >= 1024) setVisibleServices(3);
-            else if (window.innerWidth >= 768) setVisibleServices(2);
-            else setVisibleServices(1);
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    // Intersection Observer for animations
-    useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        // Small delay to allow DOM to populate
-        setTimeout(() => {
-            document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-        }, 500);
-
-        return () => observer.disconnect();
-    }, [services, projects]);
-
-    const scrollToSection = (id) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
+    const handleServiceClick = (category) => {
+        setSelectedCategory(category);
+        setIsModalOpen(true);
     };
 
-    const handleNextService = () => {
-        const max = Math.max(0, services.length - visibleServices);
-        setCurrentService(curr => Math.min(curr + 1, max));
-    };
-
-    const handlePrevService = () => {
-        setCurrentService(curr => Math.max(curr - 1, 0));
-    };
-
-    // Project Pagination Handlers
-    const handleNextProjectPage = () => {
-        const maxPage = Math.ceil(projects.length / projectsPerPage) - 1;
-        setProjectPage(curr => Math.min(curr + 1, maxPage));
-    };
-
-    const handlePrevProjectPage = () => {
-        setProjectPage(curr => Math.max(curr - 1, 0));
-    };
-
-    const visibleProjects = projects.slice(
-        projectPage * projectsPerPage,
-        (projectPage + 1) * projectsPerPage
-    );
+    // ... (existing code)
 
     return (
         <div className="landing-page font-sans text-slate-900 bg-white">
             <Header />
 
-            <main>
-                {/* Hero */}
-                <section className="hero" id="hero">
-                    <div className="container">
-                        <div className="hero__content">
-                            <h1 className="hero__title">
-                                <span className="hero__brand">Empire Premium</span> — <span className="hero__title-small">строим ваше будущее!</span>
-                            </h1>
-                            <p className="hero__subtitle">
-                                Empire Premium — это строительная компания премиум-класса с командой экспертов, воплощающих в жизнь даже самые смелые идеи.
-                            </p>
-                            <div className="hero__buttons">
-                                <button onClick={() => scrollToSection('footer-form')} className="btn btn--primary">
-                                    Оставить заявку <ArrowRight className="w-4 h-4 ml-2" />
-                                </button>
-                            </div>
-                            <div className="hero__stats">
-                                <div className="hero__stat">
-                                    <div className="hero__stat-num">2+</div>
-                                    <div className="hero__stat-label">Многолетний опыт</div>
-                                </div>
-                                <div className="hero__stat">
-                                    <div className="hero__stat-num">200+</div>
-                                    <div className="hero__stat-label">Реализовали проектов</div>
-                                </div>
-                                <div className="hero__stat">
-                                    <div className="hero__stat-num">5</div>
-                                    <div className="hero__stat-label">Гарантия в годах</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="hero__visual">
-                            <div className="hero__visual-inner">
-                                <div className="hero__visual-placeholder">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop"
-                                        alt="Hero Building"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            <ServiceModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                category={selectedCategory}
+            />
 
-                {/* Features */}
-                <section className="section features" id="about">
-                    <div className="container">
-                        <div className="features__wrap">
-                            <div className="features__text">
-                                <h2 className="section__title animate-on-scroll section__title--split">
-                                    <span className="section__title-accent">Мы поддерживаем наших клиентов на каждом этапе:</span> <span className="section__title-base">от концепции до сдачи «под ключ»</span>
-                                </h2>
-                                <p className="section__subtitle animate-on-scroll">С нами вы выбираете надежность, комфорт и стиль.</p>
-                                <button onClick={() => scrollToSection('footer-form')} className="btn btn--primary animate-on-scroll">
-                                    Связаться с нами <ArrowRight className="w-4 h-4 ml-2" />
-                                </button>
-                            </div>
-                            <div className="features__grid">
-                                <article className="feature-card animate-on-scroll">
-                                    <div className="feature-card__icon"><ThumbsUp /></div>
-                                    <h3 className="feature-card__title">Безупречное Качество</h3>
-                                    <p className="feature-card__text">Мы используем только лучшие материалы и передовые технологии.</p>
-                                </article>
-                                <article className="feature-card animate-on-scroll">
-                                    <div className="feature-card__icon"><Zap /></div>
-                                    <h3 className="feature-card__title">Инновационные Решения</h3>
-                                    <p className="feature-card__text">Наша команда постоянно ищет новые подходы.</p>
-                                </article>
-                                <article className="feature-card animate-on-scroll">
-                                    <div className="feature-card__icon"><Heart /></div>
-                                    <h3 className="feature-card__title">Клиентоориентированный Подход</h3>
-                                    <p className="feature-card__text">Мы внимательно слушаем ваши потребности.</p>
-                                </article>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            <main>
+                {/* ... (existing sections) */}
 
                 {/* Services */}
                 <section className="section services" id="services">
@@ -221,7 +72,10 @@ export default function Home() {
                                                 className="flex-shrink-0 animate-on-scroll"
                                                 style={{ width: `calc((100% - ${(visibleServices - 1) * 24}px) / ${visibleServices})` }}
                                             >
-                                                <ServiceCard category={service} />
+                                                <ServiceCard
+                                                    category={service}
+                                                    onClick={() => handleServiceClick(service)}
+                                                />
                                             </div>
                                         ))}
                                     </div>

@@ -13,6 +13,9 @@ class TicketBase(BaseModel):
     priority: Optional[str] = "Mittel"
     assigned_to_id: Optional[str] = None
     response: Optional[str] = None
+    service_id: Optional[str] = None
+    booking_date: Optional[datetime] = None
+    source: Optional[str] = "home_form"
 
 class TicketCreate(TicketBase):
     pass

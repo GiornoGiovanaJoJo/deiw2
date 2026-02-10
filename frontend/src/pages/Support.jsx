@@ -175,8 +175,9 @@ export default function Support() {
                             <TableRow>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Betreff</TableHead>
+                                <TableHead>Leistung & Termin</TableHead>
                                 <TableHead>Absender</TableHead>
-                                <TableHead>Datum</TableHead>
+                                <TableHead>Erstellt am</TableHead>
                                 <TableHead className="text-right">Aktionen</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -187,10 +188,21 @@ export default function Support() {
                                     <TableCell className="font-medium">
                                         <div>{ticket.subject}</div>
                                         <div className="text-xs text-slate-500 truncate max-w-[300px]">{ticket.message}</div>
+                                        <div className="flex gap-2 mt-1">
+                                            <Badge variant="outline" className="text-[10px] h-5">{ticket.category}</Badge>
+                                            {ticket.source && <Badge variant="secondary" className="text-[10px] h-5">{ticket.source}</Badge>}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="text-sm font-medium">{ticket.service_id || '-'}</div>
+                                        <div className="text-xs text-slate-500">
+                                            {ticket.booking_date ? format(new Date(ticket.booking_date), 'dd.MM.yyyy') : '-'}
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="text-sm">{ticket.sender_name}</div>
                                         <div className="text-xs text-slate-500">{ticket.sender_email}</div>
+                                        <div className="text-xs text-slate-500">{ticket.sender_phone}</div>
                                     </TableCell>
                                     <TableCell className="text-sm text-slate-500">
                                         {ticket.created_date ? format(new Date(ticket.created_date), 'dd.MM.yyyy HH:mm') : '-'}

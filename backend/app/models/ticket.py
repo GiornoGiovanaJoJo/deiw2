@@ -27,3 +27,8 @@ class Ticket(Base):
     assigned_to_id = Column(String, nullable=True) # User ID as string or int? Let's use string for flexibility if external auth
     response = Column(Text, nullable=True)
     created_date = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # New fields for Service Booking
+    service_id = Column(String, nullable=True)
+    booking_date = Column(DateTime(timezone=True), nullable=True)
+    source = Column(String, default="home_form") # "home_form", "service_modal", "contact_page"
