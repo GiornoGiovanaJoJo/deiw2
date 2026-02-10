@@ -8,7 +8,7 @@ export const publicApi = {
         return response.data;
     },
     getProjects: async (limit = 10) => {
-        const response = await api.get(`/projects?limit=${limit}`);
+        const response = await api.get(`/projects/public?limit=${limit}`);
         return response.data;
     },
     getProjectById: async (id) => {
