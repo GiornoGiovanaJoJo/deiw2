@@ -15,6 +15,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Eye, Trash2, Calendar, Pencil } from "lucide-react";
 import ProjectModal from "@/components/ProjectModal";
+import ProjectAdminModal from "@/components/ProjectAdminModal";
+import { FolderCog } from "lucide-react";
 
 export default function Projects() {
     const [projects, setProjects] = useState([]);
@@ -66,6 +68,15 @@ export default function Projects() {
         loadProjects(); // Reload to reflect changes
     };
 
+    // Admin Modal State
+    const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+    const [adminModalProject, setAdminModalProject] = useState(null);
+
+    const handleManageClick = (project) => {
+        setAdminModalProject(project);
+        setIsAdminModalOpen(true);
+    };
+
     const filteredProjects = projects.filter(project => {
         const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (project.projekt_nummer && project.projekt_nummer.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -98,6 +109,13 @@ export default function Projects() {
                 onClose={() => setIsModalOpen(false)}
                 project={editingProject}
                 onSave={handleSave}
+            />
+
+            <ProjectAdminModal
+                isOpen={isAdminModalOpen}
+                onClose={() => setIsAdminModalOpen(false)}
+                project={adminModalProject}
+                onUpdate={loadProjects}
             />
 
             <Card>
@@ -168,6 +186,9 @@ export default function Projects() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    <Button variant="outline" size="sm" onClick={() => handleManageClick(project)} title="Verwalten (Fotos, Docs, Chat)">
+                                                        <FolderCog className="w-4 h-4 text-blue-600" />
+                                                    </Button>
                                                     <Button variant="ghost" size="sm" onClick={() => handleEditClick(project)}>
                                                         <Pencil className="w-4 h-4 text-slate-500" />
                                                     </Button>
