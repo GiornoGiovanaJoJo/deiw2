@@ -10,6 +10,32 @@ router = APIRouter()
 
 UPLOAD_DIR = "backend/static/uploads"
 
+@router.post("/", response_model=dict)
+async def upload_file(
+    file: UploadFile = File(...),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Upload a generic file.
+    """
+    # Base dir: backend/
+    # endpoints -> api_v1 -> api -> app -> backend
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+    upload_path = os.path.join(base_dir, "static", "uploads")
+    
+    os.makedirs(upload_path, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = os.path.splitext(file.filename)[1]
+    filename = f"{uuid.uuid4()}{file_ext}"
+    file_location = os.path.join(upload_path, filename)
+    
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {"url": f"/assets/uploads/{filename}"}
+
+
 @router.post("/image", response_model=dict)
 async def upload_image(
     file: UploadFile = File(...),
@@ -22,12 +48,8 @@ async def upload_image(
         raise HTTPException(status_code=400, detail="File must be an image")
     
     # Ensure upload directory exists
-    # We need to resolve the path relative to the project root
-    # Assuming start execution from backend or project root, careful with paths
-    # Better to use absolute path based on app location
-    
     # Base dir: backend/
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
     upload_path = os.path.join(base_dir, "static", "uploads")
     
     os.makedirs(upload_path, exist_ok=True)
