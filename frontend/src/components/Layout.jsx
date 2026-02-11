@@ -11,7 +11,15 @@ import {
     X,
     FileText,
     Settings,
-    Briefcase
+    Briefcase,
+    ListTodo,
+    Tags,
+    CreditCard,
+    HardHat,
+    Monitor,
+    UserCheck,
+    History,
+    DollarSign,
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from './LanguageSwitcher';
@@ -25,12 +33,20 @@ export default function Layout() {
 
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro', 'Worker'] },
-        { name: 'Users', path: '/users', icon: Users, roles: ['Admin'] },
+        { name: 'Tasks', path: '/tasks', icon: ListTodo, roles: ['Admin', 'Projektleiter', 'Worker'] },
         { name: 'Projects', path: '/projects', icon: Briefcase, roles: ['Admin', 'Projektleiter', 'Gruppenleiter'] },
+        { name: 'Support', path: '/support', icon: ClipboardList, roles: ['Admin', 'Projektleiter', 'Büro'] },
+        { name: 'Categories', path: '/categories', icon: Tags, roles: ['Admin'] },
+        { name: 'Customers', path: '/customers', icon: Users, roles: ['Admin', 'Projektleiter', 'Büro'] },
         { name: 'Warehouse', path: '/warehouse', icon: Box, roles: ['Admin', 'Projektleiter', 'Worker'] },
-        { name: 'Requests', path: '/support', icon: ClipboardList, roles: ['Admin', 'Projektleiter', 'Büro'] },
+        { name: 'Terminal', path: '/terminal', icon: Monitor, roles: ['Admin', 'Projektleiter'] },
         { name: 'Time Tracking', path: '/time-tracking', icon: FileText, roles: ['Admin', 'Projektleiter', 'Worker'] },
+        { name: 'Warehouse Logs', path: '/warehouse/logs', icon: History, roles: ['Admin', 'Projektleiter', 'Worker'] },
+        { name: 'Cash Register', path: '/warehouse/cash-register', icon: DollarSign, roles: ['Admin', 'Projektleiter', 'Worker'] },
+        { name: 'Finance', path: '/finance', icon: CreditCard, roles: ['Admin', 'Projektleiter', 'Büro'] },
+        { name: 'Subcontractors', path: '/subcontractors', icon: HardHat, roles: ['Admin', 'Projektleiter'] },
         { name: 'Content Management', path: '/content', icon: Settings, roles: ['Admin'] },
+        { name: 'User Management', path: '/users', icon: UserCheck, roles: ['Admin'] },
     ];
 
     const filteredNavItems = navItems.filter(item =>
