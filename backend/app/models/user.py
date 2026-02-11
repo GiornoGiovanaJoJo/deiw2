@@ -10,6 +10,7 @@ class UserRole(str, enum.Enum):
     WORKER = "Worker"
     OFFICE = "Büro"
     WAREHOUSE = "Warehouse"
+    CLIENT = "Kunde"
 
 class User(Base):
     id = Column(Integer, primary_key=True, index=True)

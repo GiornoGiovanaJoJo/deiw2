@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProjectStages from "@/components/project/ProjectStages";
 import ProjectDocuments from "@/components/project/ProjectDocuments";
+import ProjectChat from "@/components/project/ProjectChat";
 
 
 import { useAuth } from '@/context/AuthContext';
@@ -168,6 +169,12 @@ export default function ProjectDetails() {
                                 >
                                     Dokumente
                                 </button>
+                                <button
+                                    onClick={() => setActiveTab('chat')}
+                                    className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === 'chat' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Kommunikation
+                                </button>
                             </>
                         )}
                     </div>
@@ -232,6 +239,12 @@ export default function ProjectDetails() {
                 {activeTab === 'docs' && (
                     <div className="container pb-16">
                         <ProjectDocuments projectId={id} />
+                    </div>
+                )}
+
+                {activeTab === 'chat' && (
+                    <div className="container pb-16">
+                        <ProjectChat projectId={id} />
                     </div>
                 )}
             </main>

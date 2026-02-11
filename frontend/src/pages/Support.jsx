@@ -208,10 +208,32 @@ export default function Support() {
                                         {ticket.created_date ? format(new Date(ticket.created_date), 'dd.MM.yyyy HH:mm') : '-'}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm" onClick={() => handleOpenReply(ticket)}>
-                                            <MessageSquare className="w-4 h-4 mr-2" />
-                                            Antworten
-                                        </Button>
+                                        <div className="flex justify-end gap-2">
+                                            <Button variant="ghost" size="sm" onClick={() => handleOpenReply(ticket)}>
+                                                <MessageSquare className="w-4 h-4 mr-2" />
+                                                Antworten
+                                            </Button>
+                                            {ticket.status !== 'Geschlossen' && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={async () => {
+                                                        if (confirm('Möchten Sie dieses Ticket wirklich in ein Projekt umwandeln?')) {
+                                                            try {
+                                                                await clientApi.convertTicketToProject(ticket.id);
+                                                                alert('Ticket erfolgreich in Projekt umgewandelt!');
+                                                                loadTickets();
+                                                            } catch (err) {
+                                                                console.error(err);
+                                                                alert('Fehler bei der Umwandlung.');
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    In Projekt umwandeln
+                                                </Button>
+                                            )}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}

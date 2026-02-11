@@ -72,3 +72,67 @@ def update_ticket(
     db.commit()
     db.refresh(ticket)
     return ticket
+
+@router.post("/{id}/convert-to-project", response_model=Any)
+def convert_ticket_to_project(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+    current_user: Any = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Convert a ticket to a project.
+    Creates a Customer if one doesn't exist for the email.
+    Creates a Project linked to that Customer.
+    """
+    # 0. Get Ticket
+    ticket = db.query(Ticket).filter(Ticket.id == id).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+        
+    if not ticket.sender_email:
+         raise HTTPException(status_code=400, detail="Ticket has no sender email, cannot link to customer.")
+
+    # 1. Find or Create Customer
+    from app.models.customer import Customer, CustomerType
+    customer = db.query(Customer).filter(Customer.email == ticket.sender_email).first()
+    
+    if not customer:
+        customer = Customer(
+            type=CustomerType.PRIVATE, # Default to private
+            contact_person=ticket.sender_name,
+            email=ticket.sender_email,
+            phone=ticket.sender_phone,
+            notes=f"Auto-created from Ticket #{ticket.id}"
+        )
+        db.add(customer)
+        db.commit()
+        db.refresh(customer)
+        
+    # 2. Create Project
+    from app.models.project import Projekt, ProjectStatus
+    from app.api.api_v1.endpoints.projects import generate_project_number
+    
+    # Generate number
+    project_number = generate_project_number(db)
+    
+    new_project = Projekt(
+        projekt_nummer=project_number,
+        name=ticket.subject or f"Project from Ticket #{ticket.id}",
+        description=ticket.message,
+        status=ProjectStatus.GEPLANT,
+        customer_id=customer.id,
+        # We could try to match category if names align, but for now leave null or default
+    )
+    
+    db.add(new_project)
+    
+    # 3. Update Ticket
+    ticket.status = TicketStatus.CLOSED
+    ticket.response = f"Converted to Project {project_number}"
+    db.add(ticket)
+    
+    db.commit()
+    db.refresh(new_project)
+    
+    return new_project

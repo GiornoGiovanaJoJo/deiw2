@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Instagram, Mail, Phone, Clock, ArrowRight } from 'lucide-react';
+import { publicApi } from "@/api/public";
 // import api from "@/api/axios"; // Use when API endpoint is ready
 import '../pages/Home.css';
 
@@ -13,14 +14,16 @@ export default function Footer() {
         const formData = new FormData(e.target);
 
         const data = {
-            name: formData.get('name'),
-            phone: formData.get('phone'),
-            email: formData.get('email'),
+            sender_name: formData.get('name'), // Mapped to sender_name
+            sender_phone: formData.get('phone'), // Mapped to sender_phone
+            sender_email: formData.get('email'), // Mapped to sender_email
             message: formData.get('message'),
-            type: activeTab
+            subject: `Anfrage von Footer: ${activeTab}`, // Added subject
+            category: activeTab, // Mapped to category
+            source: 'footer_form'
         };
 
-        if (!data.name || !data.phone || !data.email) {
+        if (!data.sender_name || !data.sender_phone || !data.sender_email) {
             setFormMessage({ text: 'Пожалуйста, заполните все поля.', type: 'error' });
             return;
         }
@@ -29,8 +32,7 @@ export default function Footer() {
         setFormMessage({ text: '', type: '' });
 
         try {
-            // await api.post('/public/inquiry', data); // Setup this endpoint later
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Mock
+            await publicApi.submitInquiry(data);
             setFormMessage({ text: 'Спасибо! Мы свяжемся с вами в течение 15 минут.', type: 'success' });
             e.target.reset();
         } catch (error) {

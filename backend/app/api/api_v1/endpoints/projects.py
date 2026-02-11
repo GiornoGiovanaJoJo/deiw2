@@ -82,6 +82,11 @@ def read_projects(
     elif current_user.role == UserRole.WORKER:
         # See projects where they are worker (M2M)
         query = query.filter(Projekt.workers.any(id=current_user.id))
+    elif current_user.role == UserRole.CLIENT:
+        # See projects linked to their customer record via email
+        # We need to join with Customer table to filter by email
+        from app.models.customer import Customer
+        query = query.join(Projekt.customer).filter(Customer.email == current_user.email)
     
     projects = query.offset(skip).limit(limit).all()
     return projects

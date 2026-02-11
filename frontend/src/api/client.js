@@ -194,6 +194,9 @@ export const clientApi = {
     updateTicket: async (id, data) => {
         return api.put(`/tickets/${id}`, data);
     },
+    convertTicketToProject: async (id) => {
+        return api.post(`/tickets/${id}/convert-to-project`);
+    },
 
     // Notes
     getNotes: async (userId) => {
