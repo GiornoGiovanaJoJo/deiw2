@@ -19,7 +19,7 @@ import ServiceModal from "@/components/ServiceModal";
 export default function Home() {
     const [scrolled, setScrolled] = useState(false);
     const [currentService, setCurrentService] = useState(0);
-    const [visibleServices, setVisibleServices] = useState(1);
+    const [visibleServices, setVisibleServices] = useState(3); // Default to 3 for desktop
 
     // Modal State
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -30,14 +30,129 @@ export default function Home() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // ... (existing code)
+    // Project Pagination
+    const [projectPage, setProjectPage] = useState(0);
+    const projectsPerPage = 3;
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setVisibleServices(1);
+            } else if (window.innerWidth < 1024) {
+                setVisibleServices(2);
+            } else {
+                setVisibleServices(3);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('resize', handleResize);
+
+        // Initial check
+        handleResize();
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    // Helper: Scroll to section
+    const scrollToSection = (id) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    // Data Fetching
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                // Fetch categories and projects in parallel
+                // Catch errors individually to allow partial success or fallback
+                const [categoriesData, projectsData] = await Promise.all([
+                    publicApi.getCategories().catch(err => {
+                        console.error("Error fetching categories:", err);
+                        return [];
+                    }),
+                    publicApi.getProjects().catch(err => {
+                        console.error("Error fetching projects:", err);
+                        return [];
+                    })
+                ]);
+
+                // Handle Services (Categories)
+                if (categoriesData && categoriesData.length > 0) {
+                    setServices(categoriesData);
+                } else {
+                    // Default Services if API returns empty
+                    setServices([
+                        { id: 'd1', name: 'Ремонт квартир', description: 'Комплексный ремонт под ключ', icon_name: 'home' },
+                        { id: 'd2', name: 'Строительство', description: 'Строительство домов и коттеджей', icon_name: 'hammer' },
+                        { id: 'd3', name: 'Дизайн', description: 'Разработка дизайн-проектов', icon_name: 'pen-tool' },
+                        { id: 'd4', name: 'Электрика', description: 'Электромонтажные работы любой сложности', icon_name: 'zap' },
+                        { id: 'd5', name: 'Сантехника', description: 'Разводка труб и установка сантехники', icon_name: 'droplet' },
+                    ]);
+                }
+
+                // Handle Projects
+                if (projectsData && projectsData.length > 0) {
+                    setProjects(projectsData);
+                } else {
+                    // Default Projects if API returns empty
+                    setProjects([
+                        { id: 'p1', name: 'Современный лофт', description: 'Ремонт квартиры в стиле лофт', status: 'Завершен', address: 'Москва, Центр' },
+                        { id: 'p2', name: 'Загородный дом', description: 'Строительство коттеджа под ключ', status: 'В процессе', address: 'Подмосковье' },
+                        { id: 'p3', name: 'Офис IT', description: 'Отделка офисного помещения', status: 'Завершен', address: 'Москва, Сити' },
+                        { id: 'p4', name: 'Студия', description: 'Дизайнерский ремонт студии', status: 'Завершен', address: 'Санкт-Петербург' },
+                    ]);
+                }
+
+            } catch (error) {
+                console.error("Critical error fetching home data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const handleServiceClick = (category) => {
         setSelectedCategory(category);
         setIsModalOpen(true);
     };
 
-    // ... (existing code)
+    // Service Carousel Handlers
+    const handlePrevService = () => {
+        setCurrentService(prev => Math.max(0, prev - 1));
+    };
+
+    const handleNextService = () => {
+        setCurrentService(prev => Math.min(services.length - visibleServices, prev + 1));
+    };
+
+    // Project Pagination Handlers
+    const handlePrevProjectPage = () => {
+        setProjectPage(prev => Math.max(0, prev - 1));
+    };
+
+    const handleNextProjectPage = () => {
+        const maxPage = Math.ceil(projects.length / projectsPerPage) - 1;
+        setProjectPage(prev => Math.min(maxPage, prev + 1));
+    };
+
+    // Computed Visible Projects
+    const visibleProjects = projects.slice(
+        projectPage * projectsPerPage,
+        (projectPage + 1) * projectsPerPage
+    );
 
     return (
         <div className="landing-page font-sans text-slate-900 bg-white">
@@ -50,6 +165,46 @@ export default function Home() {
             />
 
             <main>
+                {/* Hero Section */}
+                <section className="hero relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 bg-slate-900/60 z-10"></div>
+                    <div
+                        className="absolute inset-0 bg-cover bg-center z-0 transition-transform duration-10000 hover:scale-105"
+                        style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2531&auto=format&fit=crop")' }}
+                    ></div>
+
+                    <div className="container relative z-20 text-center text-white px-4">
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight animate-fade-in-up">
+                            Строим будущее <br />
+                            <span className="text-primary">вашего комфорта</span>
+                        </h1>
+                        <p className="text-xl md:text-2xl text-slate-200 mb-10 max-w-2xl mx-auto animate-fade-in-up delay-100">
+                            Профессиональный ремонт и строительство с гарантией качества и соблюдением сроков.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-200">
+                            <button
+                                onClick={() => scrollToSection('services')}
+                                className="px-8 py-4 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-all transform hover:-translate-y-1 shadow-lg shadow-primary/30 flex items-center justify-center gap-2"
+                            >
+                                <Zap className="w-5 h-5" />
+                                Заказать услуги
+                            </button>
+                            <button
+                                onClick={() => scrollToSection('projects')}
+                                className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                            >
+                                <ThumbsUp className="w-5 h-5" />
+                                Наши работы
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="absolute bottom-10 left-0 right-0 z-20 flex justify-center animate-bounce">
+                        <ArrowRight className="w-6 h-6 text-white transform rotate-90" />
+                    </div>
+                </section>
+
+
                 {/* ... (existing sections) */}
 
                 {/* Services */}

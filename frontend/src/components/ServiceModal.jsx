@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useAuth } from "@/context/AuthContext";
 import {
     Dialog,
     DialogContent,
@@ -23,6 +24,7 @@ const STEPS = {
 };
 
 export default function ServiceModal({ isOpen, onClose, category }) {
+    const { user } = useAuth();
     const [step, setStep] = useState(STEPS.SERVICE);
     const [selectedSubService, setSelectedSubService] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
@@ -45,9 +47,20 @@ export default function ServiceModal({ isOpen, onClose, category }) {
             setSelectedSubService(null);
             setSelectedDate(null);
             setLoading(false);
-            setFormData({ name: '', email: '', phone: '', message: '', city: '' });
+
+            if (user) {
+                setFormData({
+                    name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+                    email: user.email || '',
+                    phone: user.phone || '',
+                    message: '',
+                    city: ''
+                });
+            } else {
+                setFormData({ name: '', email: '', phone: '', message: '', city: '' });
+            }
         }
-    }, [isOpen, category]);
+    }, [isOpen, category, user]);
 
     // Mock sub-services if category doesn't have children (for demo/fallback)
     const subServices = useMemo(() => {

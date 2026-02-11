@@ -2,7 +2,7 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
-from app.models.ticket import Ticket
+from app.models.ticket import Ticket, TicketStatus, TicketPriority
 from app.schemas.ticket import Ticket as TicketSchema, TicketCreate, TicketUpdate
 
 router = APIRouter()
