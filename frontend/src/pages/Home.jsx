@@ -6,10 +6,6 @@ import {
     Heart,
     ArrowRight,
     ArrowLeft,
-    Home as HomeIcon,
-    Hammer,
-    PenTool,
-    Droplet
 } from 'lucide-react';
 import './Home.css';
 import { publicApi } from "@/api/public";
@@ -17,13 +13,12 @@ import ServiceCard from "@/components/ServiceCard";
 import ProjectCard from "@/components/ProjectCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
 import ServiceModal from "@/components/ServiceModal";
 
 export default function Home() {
     const [scrolled, setScrolled] = useState(false);
     const [currentService, setCurrentService] = useState(0);
-    const [visibleServices, setVisibleServices] = useState(3); // Default to 3 for desktop
+    const [visibleServices, setVisibleServices] = useState(1);
 
     // Modal State
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -38,49 +33,11 @@ export default function Home() {
     const [projectPage, setProjectPage] = useState(0);
     const projectsPerPage = 3;
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
-        };
-
-        const handleResize = () => {
-            if (window.innerWidth < 768) {
-                setVisibleServices(1);
-            } else if (window.innerWidth < 1024) {
-                setVisibleServices(2);
-            } else {
-                setVisibleServices(3);
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        window.addEventListener('resize', handleResize);
-
-        // Initial check
-        handleResize();
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
-
-    // Helper: Scroll to section
-    const scrollToSection = (id) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
     // Data Fetching
     useEffect(() => {
-        const fetchData = async () => {
+        const loadPublicData = async () => {
             try {
-                setLoading(true);
-                // Fetch categories and projects in parallel
-                // Catch errors individually to allow partial success or fallback
-                const [categoriesData, projectsData] = await Promise.all([
+                const [cats, projs] = await Promise.all([
                     publicApi.getCategories().catch(err => {
                         console.error("Error fetching categories:", err);
                         return [];
@@ -91,72 +48,110 @@ export default function Home() {
                     })
                 ]);
 
-                // Handle Services (Categories)
-                if (categoriesData && categoriesData.length > 0) {
-                    setServices(categoriesData);
+                if (cats && cats.length > 0) {
+                    setServices(cats);
                 } else {
-                    // Default Services if API returns empty
                     setServices([
-                        { id: 'd1', name: 'Ремонт квартир', description: 'Комплексный ремонт под ключ', icon_name: 'home' },
-                        { id: 'd2', name: 'Строительство', description: 'Строительство домов и коттеджей', icon_name: 'hammer' },
-                        { id: 'd3', name: 'Дизайн', description: 'Разработка дизайн-проектов', icon_name: 'pen-tool' },
-                        { id: 'd4', name: 'Электрика', description: 'Электромонтажные работы любой сложности', icon_name: 'zap' },
-                        { id: 'd5', name: 'Сантехника', description: 'Разводка труб и установка сантехники', icon_name: 'droplet' },
+                        { id: 1, name: 'Жилое строительство', description: 'Строительство современных жилых комплексов и частных домов под ключ.', icon_name: 'home' },
+                        { id: 2, name: 'Коммерческая недвижимость', description: 'Офисные здания, торговые центры и складские помещения.', icon_name: 'building' },
+                        { id: 3, name: 'Реконструкция', description: 'Восстановление и модернизация существующих зданий.', icon_name: 'hammer' },
+                        { id: 4, name: 'Проектирование', description: 'Разработка архитектурных и инженерных проектов любой сложности.', icon_name: 'pen-tool' },
+                        { id: 5, name: 'Ландшафтный дизайн', description: 'Благоустройство территорий и создание уникальных ландшафтов.', icon_name: 'tree' }
                     ]);
                 }
 
-                // Handle Projects
-                if (projectsData && projectsData.length > 0) {
-                    setProjects(projectsData);
+                if (projs && projs.length > 0) {
+                    setProjects(projs);
                 } else {
-                    // Default Projects if API returns empty
                     setProjects([
                         { id: 'p1', name: 'Современный лофт', description: 'Ремонт квартиры в стиле лофт', status: 'Завершен', adresse: 'Москва, Центр' },
                         { id: 'p2', name: 'Загородный дом', description: 'Строительство коттеджа под ключ', status: 'В процессе', adresse: 'Подмосковье' },
                         { id: 'p3', name: 'Офис IT', description: 'Отделка офисного помещения', status: 'Завершен', adresse: 'Москва, Сити' },
-                        { id: 'p4', name: 'Студия', description: 'Дизайнерский ремонт студии', status: 'Завершен', adresse: 'Санкт-Петербург' },
                     ]);
                 }
-
             } catch (error) {
-                console.error("Critical error fetching home data:", error);
+                console.error("Failed to load public data:", error);
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchData();
+        loadPublicData();
     }, []);
 
-    const handleServiceClick = (category) => {
-        setSelectedCategory(category);
-        setIsModalOpen(true);
-    };
+    // Scroll effect for header
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
-    // Service Carousel Handlers
-    const handlePrevService = () => {
-        setCurrentService(prev => Math.max(0, prev - 1));
+    // Resize listener for services carousel
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) setVisibleServices(3);
+            else if (window.innerWidth >= 768) setVisibleServices(2);
+            else setVisibleServices(1);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Intersection Observer for animations
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        setTimeout(() => {
+            document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+        }, 500);
+
+        return () => observer.disconnect();
+    }, [services, projects]);
+
+    const scrollToSection = (id) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
     const handleNextService = () => {
-        setCurrentService(prev => Math.min(services.length - visibleServices, prev + 1));
+        const max = Math.max(0, services.length - visibleServices);
+        setCurrentService(curr => Math.min(curr + 1, max));
+    };
+
+    const handlePrevService = () => {
+        setCurrentService(curr => Math.max(curr - 1, 0));
     };
 
     // Project Pagination Handlers
-    const handlePrevProjectPage = () => {
-        setProjectPage(prev => Math.max(0, prev - 1));
-    };
-
     const handleNextProjectPage = () => {
         const maxPage = Math.ceil(projects.length / projectsPerPage) - 1;
-        setProjectPage(prev => Math.min(maxPage, prev + 1));
+        setProjectPage(curr => Math.min(curr + 1, maxPage));
     };
 
-    // Computed Visible Projects
+    const handlePrevProjectPage = () => {
+        setProjectPage(curr => Math.max(curr - 1, 0));
+    };
+
     const visibleProjects = projects.slice(
         projectPage * projectsPerPage,
         (projectPage + 1) * projectsPerPage
     );
+
+    // Modal Handler
+    const handleServiceClick = (category) => {
+        setSelectedCategory(category);
+        setIsModalOpen(true);
+    };
 
     return (
         <div className="landing-page font-sans text-slate-900 bg-white">
@@ -169,90 +164,127 @@ export default function Home() {
             />
 
             <main>
-                {/* Hero Section */}
-                {/* Hero Section */}
-                <section className="hero relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden bg-slate-900">
-                    {/* Dynamic Gradient Background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-900 opacity-90 z-0 animate-gradient-xy"></div>
-
-                    {/* Decorative Elements */}
-                    <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-700"></div>
-
-                    <div className="container relative z-20 text-center text-white px-4">
-                        <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-indigo-300 font-medium text-sm animate-fade-in-up">
-                            ✨ Профессиональный ремонт и строительство
+                {/* Hero */}
+                <section className="hero" id="hero">
+                    <div className="container">
+                        <div className="hero__content">
+                            <h1 className="hero__title">
+                                <span className="hero__brand">Empire Premium</span> — <span className="hero__title-small">строим ваше будущее!</span>
+                            </h1>
+                            <p className="hero__subtitle">
+                                Empire Premium — это строительная компания премиум-класса с командой экспертов, воплощающих в жизнь даже самые смелые идеи.
+                            </p>
+                            <div className="hero__buttons">
+                                <button onClick={() => scrollToSection('footer-form')} className="btn btn--primary">
+                                    Оставить заявку <ArrowRight className="w-4 h-4 ml-2" />
+                                </button>
+                            </div>
+                            <div className="hero__stats">
+                                <div className="hero__stat">
+                                    <div className="hero__stat-num">2+</div>
+                                    <div className="hero__stat-label">Многолетний опыт</div>
+                                </div>
+                                <div className="hero__stat">
+                                    <div className="hero__stat-num">200+</div>
+                                    <div className="hero__stat-label">Реализовали проектов</div>
+                                </div>
+                                <div className="hero__stat">
+                                    <div className="hero__stat-num">5</div>
+                                    <div className="hero__stat-label">Гарантия в годах</div>
+                                </div>
+                            </div>
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight animate-fade-in-up delay-100 leading-tight">
-                            Строим будущее <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
-                                вашего комфорта
-                            </span>
-                        </h1>
-                        <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-2xl mx-auto animate-fade-in-up delay-200 leading-relaxed font-light">
-                            Воплощаем мечты в реальность: от дизайн-проекта до сдачи ключей. Гарантия качества на каждом этапе.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
-                            <button
-                                onClick={() => scrollToSection('services')}
-                                className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all transform hover:-translate-y-1 shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
-                            >
-                                <Zap className="w-5 h-5" />
-                                Заказать услуги
-                            </button>
-                            <button
-                                onClick={() => scrollToSection('projects')}
-                                className="px-8 py-4 bg-white/5 hover:bg-white/10 backdrop-blur-sm text-white border border-white/20 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 hover:border-white/40"
-                            >
-                                <ThumbsUp className="w-5 h-5" />
-                                Наши работы
-                            </button>
+                        <div className="hero__visual">
+                            <div className="hero__visual-inner">
+                                <div className="hero__visual-placeholder">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop"
+                                        alt="Hero Building"
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="absolute bottom-10 left-0 right-0 z-20 flex justify-center animate-bounce">
-                        <ArrowRight className="w-6 h-6 text-slate-400 transform rotate-90" />
                     </div>
                 </section>
 
-
-                {/* ... (existing sections) */}
-
-                {/* Services */}
-                {/* Services */}
-                <section className="section services py-20 bg-slate-50" id="services">
+                {/* Features */}
+                <section className="section features" id="about">
                     <div className="container">
-                        <div className="text-center mb-16">
-                            <span className="text-indigo-600 font-bold tracking-wider uppercase text-sm mb-2 block animate-on-scroll">Наши компетенции</span>
-                            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 animate-on-scroll">Услуги под ключ</h2>
+                        <div className="features__wrap">
+                            <div className="features__text">
+                                <h2 className="section__title animate-on-scroll section__title--split">
+                                    <span className="section__title-accent">Мы поддерживаем наших клиентов на каждом этапе:</span> <span className="section__title-base">от концепции до сдачи «под ключ»</span>
+                                </h2>
+                                <p className="section__subtitle animate-on-scroll">С нами вы выбираете надежность, комфорт и стиль.</p>
+                                <button onClick={() => scrollToSection('footer-form')} className="btn btn--primary animate-on-scroll">
+                                    Связаться с нами <ArrowRight className="w-4 h-4 ml-2" />
+                                </button>
+                            </div>
+                            <div className="features__grid">
+                                <article className="feature-card animate-on-scroll">
+                                    <div className="feature-card__icon"><ThumbsUp /></div>
+                                    <h3 className="feature-card__title">Безупречное Качество</h3>
+                                    <p className="feature-card__text">Мы используем только лучшие материалы и передовые технологии.</p>
+                                </article>
+                                <article className="feature-card animate-on-scroll">
+                                    <div className="feature-card__icon"><Zap /></div>
+                                    <h3 className="feature-card__title">Инновационные Решения</h3>
+                                    <p className="feature-card__text">Наша команда постоянно ищет новые подходы.</p>
+                                </article>
+                                <article className="feature-card animate-on-scroll">
+                                    <div className="feature-card__icon"><Heart /></div>
+                                    <h3 className="feature-card__title">Клиентоориентированный Подход</h3>
+                                    <p className="feature-card__text">Мы внимательно слушаем ваши потребности.</p>
+                                </article>
+                            </div>
                         </div>
+                    </div>
+                </section>
+
+                {/* Services */}
+                <section className="section services" id="services">
+                    <div className="container">
+                        <h2 className="section__title animate-on-scroll mb-8">Наши услуги</h2>
 
                         {loading ? (
                             <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {services.map((service, idx) => {
-                                    // Map icon_name to Lucide icon component if needed, or use defaults
-                                    let IconComponent = null;
-                                    switch (service.icon_name) {
-                                        case 'home': IconComponent = HomeIcon; break;
-                                        case 'hammer': IconComponent = Hammer; break;
-                                        case 'pen-tool': IconComponent = PenTool; break;
-                                        case 'zap': IconComponent = Zap; break;
-                                        case 'droplet': IconComponent = Droplet; break;
-                                        default: IconComponent = Zap;
-                                    }
-
-                                    return (
-                                        <div key={service.id || idx} className="animate-on-scroll" style={{ animationDelay: `${idx * 100}ms` }}>
-                                            <ServiceCard
-                                                category={service}
-                                                icon={IconComponent}
-                                                onClick={() => handleServiceClick(service)}
-                                            />
-                                        </div>
-                                    );
-                                })}
+                            <div className="relative">
+                                <div className="overflow-hidden p-2 -m-2">
+                                    <div
+                                        className="flex transition-transform duration-500 ease-in-out gap-6"
+                                        style={{ transform: `translateX(calc(-${(currentService * (100 / visibleServices))}%)` }}
+                                    >
+                                        {services.map((service, idx) => (
+                                            <div
+                                                key={service.id || idx}
+                                                className="flex-shrink-0 animate-on-scroll"
+                                                style={{ width: `calc((100% - ${(visibleServices - 1) * 24}px) / ${visibleServices})` }}
+                                            >
+                                                <ServiceCard
+                                                    category={service}
+                                                    onClick={() => handleServiceClick(service)}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex justify-end gap-2 mt-6">
+                                    <button
+                                        onClick={handlePrevService}
+                                        className="services__arrow"
+                                        disabled={currentService === 0}
+                                    >
+                                        <ArrowLeft className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={handleNextService}
+                                        className="services__arrow"
+                                        disabled={currentService >= services.length - visibleServices}
+                                    >
+                                        <ArrowRight className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -263,28 +295,24 @@ export default function Home() {
                 </section>
 
                 {/* Projects */}
-                <section className="section projects py-20 bg-white" id="projects">
+                <section className="section projects" id="projects">
                     <div className="container">
-                        <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
-                            <div className="animate-on-scroll">
-                                <span className="text-indigo-600 font-bold tracking-wider uppercase text-sm mb-2 block">Портфолио</span>
-                                <h2 className="text-3xl md:text-5xl font-bold text-slate-900">Реализованные проекты</h2>
-                            </div>
-
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="section__title animate-on-scroll">Наши проекты</h2>
                             {/* Pagination Controls */}
                             {projects.length > 0 && (
-                                <div className="flex gap-2 animate-on-scroll">
+                                <div className="flex gap-2">
                                     <button
                                         onClick={handlePrevProjectPage}
                                         disabled={projectPage === 0}
-                                        className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-slate-600"
+                                        className="services__arrow w-10 h-10 disabled:opacity-50"
                                     >
                                         <ArrowLeft className="w-5 h-5" />
                                     </button>
                                     <button
                                         onClick={handleNextProjectPage}
                                         disabled={(projectPage + 1) * projectsPerPage >= projects.length}
-                                        className="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-colors shadow-lg shadow-indigo-200"
+                                        className="services__arrow w-10 h-10 disabled:opacity-50"
                                     >
                                         <ArrowRight className="w-5 h-5" />
                                     </button>
@@ -295,9 +323,9 @@ export default function Home() {
                         {loading ? (
                             <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="projects__grid">
                                 {visibleProjects.map((project, idx) => (
-                                    <div key={project.id || idx} className="h-full animate-on-scroll" style={{ animationDelay: `${idx * 150}ms` }}>
+                                    <div key={project.id || idx} className="h-full animate-on-scroll">
                                         <ProjectCard project={project} />
                                     </div>
                                 ))}
@@ -311,27 +339,13 @@ export default function Home() {
                 </section>
 
                 {/* CTA */}
-                {/* CTA */}
-                <section className="cta-section py-20 relative overflow-hidden" id="contact">
-                    <div className="container relative z-10">
-                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-10 md:p-16 text-center text-white shadow-2xl relative overflow-hidden">
-                            {/* Decorative circles */}
-                            <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-                            <div className="absolute bottom-0 right-0 w-64 h-64 bg-indigo-900/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
-
-                            <h2 className="text-3xl md:text-5xl font-bold mb-6 animate-on-scroll relative z-10">
-                                У вас есть вопросы или<br />нужна помощь с проектом?
-                            </h2>
-                            <p className="text-indigo-100 text-lg md:text-xl mb-10 max-w-2xl mx-auto animate-on-scroll relative z-10">
-                                Свяжитесь с нами — ответим в течение 15 минут и обсудим вашу задачу. Консультация бесплатна.
-                            </p>
-                            <button
-                                onClick={() => scrollToSection('footer-form')}
-                                className="px-8 py-4 bg-white text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 mx-auto animate-on-scroll relative z-10"
-                            >
-                                Связаться с нами <ArrowRight className="w-5 h-5" />
-                            </button>
-                        </div>
+                <section className="cta-section" id="contact">
+                    <div className="container">
+                        <h2 className="section__title animate-on-scroll">У вас есть вопросы, предложения или<br />нужна помощь с вашим проектом?</h2>
+                        <p className="section__subtitle animate-on-scroll mb-8">Свяжитесь с нами — ответим в течение 15 минут и обсудим вашу задачу.</p>
+                        <button onClick={() => scrollToSection('footer-form')} className="btn btn--primary animate-on-scroll">
+                            Связаться с нами <ArrowRight className="w-4 h-4 ml-2" />
+                        </button>
                     </div>
                 </section>
 
