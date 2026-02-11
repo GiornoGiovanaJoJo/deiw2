@@ -4,7 +4,7 @@ import { clientApi } from '@/api/client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, MapPin, Coins, Users, User, FileText, Layers, Edit, Building2, Send, MessageSquare } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Coins, Users, User, FileText, Layers, Edit, Building2, Send, MessageSquare, Image, Plus, Trash2, X } from "lucide-react";
 import ProjectStages from "@/components/project/ProjectStages";
 import ProjectDocuments from "@/components/project/ProjectDocuments";
 import { format } from 'date-fns';
@@ -114,6 +114,54 @@ export default function ProjectDetailsAdmin() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    const handleMainImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const uploadRes = await clientApi.uploadImage(file);
+            const imageUrl = uploadRes.data.url;
+
+            await clientApi.updateProject(id, { main_image: imageUrl });
+            setProject(prev => ({ ...prev, main_image: imageUrl }));
+        } catch (error) {
+            console.error("Failed to upload main image", error);
+            alert("Fehler beim Hochladen des Bildes");
+        }
+    };
+
+    const handleGalleryUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        try {
+            const newPhotos = [];
+            for (const file of files) {
+                const uploadRes = await clientApi.uploadImage(file);
+                newPhotos.push(uploadRes.data.url);
+            }
+
+            const updatedPhotos = [...(project.photos || []), ...newPhotos];
+            await clientApi.updateProject(id, { photos: updatedPhotos });
+            setProject(prev => ({ ...prev, photos: updatedPhotos }));
+        } catch (error) {
+            console.error("Failed to upload gallery images", error);
+            alert("Fehler beim Hochladen der Bilder");
+        }
+    };
+
+    const removeGalleryImage = async (indexToRemove) => {
+        if (!confirm("Bild wirklich löschen?")) return;
+
+        try {
+            const updatedPhotos = project.photos.filter((_, index) => index !== indexToRemove);
+            await clientApi.updateProject(id, { photos: updatedPhotos });
+            setProject(prev => ({ ...prev, photos: updatedPhotos }));
+        } catch (error) {
+            console.error("Failed to remove image", error);
+        }
+    };
+
     useEffect(() => {
         loadProject();
     }, [id]);
@@ -161,7 +209,7 @@ export default function ProjectDetailsAdmin() {
             {/* Tabs Navigation */}
             <div className="border-b border-slate-200">
                 <nav className="flex space-x-8" aria-label="Tabs">
-                    {['overview', 'stages', 'documents', 'team', 'chat'].map((tab) => (
+                    {['overview', 'stages', 'documents', 'team', 'media', 'chat'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -176,6 +224,7 @@ export default function ProjectDetailsAdmin() {
                             {tab === 'stages' && 'Phasen & Zeitplan'}
                             {tab === 'documents' && 'Dokumente'}
                             {tab === 'team' && 'Team & Partner'}
+                            {tab === 'media' && 'Fotos & Medien'}
                             {tab === 'chat' && 'Kommunikation'}
                         </button>
                     ))}
@@ -255,6 +304,89 @@ export default function ProjectDetailsAdmin() {
 
                 {activeTab === 'documents' && (
                     <ProjectDocuments projectId={id} />
+                )}
+
+                {activeTab === 'media' && (
+                    <div className="space-y-8">
+                        {/* Main Image */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Hauptbild</CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        id="main-image-upload"
+                                        onChange={handleMainImageUpload}
+                                    />
+                                    <label htmlFor="main-image-upload">
+                                        <Button variant="outline" size="sm" className="cursor-pointer" asChild>
+                                            <span><Edit className="w-4 h-4 mr-2" /> Ändern</span>
+                                        </Button>
+                                    </label>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {project.main_image ? (
+                                    <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-100 border max-w-2xl">
+                                        <img src={project.main_image} alt="Main" className="w-full h-full object-cover" />
+                                    </div>
+                                ) : (
+                                    <div className="aspect-video rounded-lg bg-slate-50 border border-dashed flex items-center justify-center text-slate-400 max-w-2xl">
+                                        <div className="text-center">
+                                            <Image className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                            <p>Kein Hauptbild vorhanden</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Gallery */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Galerie</CardTitle>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="hidden"
+                                        id="gallery-upload"
+                                        onChange={handleGalleryUpload}
+                                    />
+                                    <label htmlFor="gallery-upload">
+                                        <Button size="sm" className="cursor-pointer" asChild>
+                                            <span><Plus className="w-4 h-4 mr-2" /> Fotos hinzufügen</span>
+                                        </Button>
+                                    </label>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {!project.photos || project.photos.length === 0 ? (
+                                    <p className="text-slate-500 text-center py-8">Keine Fotos in der Galerie.</p>
+                                ) : (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {project.photos.map((photo, index) => (
+                                            <div key={index} className="group relative aspect-square rounded-lg overflow-hidden border bg-slate-100">
+                                                <img src={photo} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="icon"
+                                                        onClick={() => removeGalleryImage(index)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
                 )}
 
                 {activeTab === 'team' && (

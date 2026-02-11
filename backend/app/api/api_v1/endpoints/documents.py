@@ -46,5 +46,19 @@ def update_document(
         setattr(doc, field, value)
     db.add(doc)
     db.commit()
+    db.commit()
     db.refresh(doc)
+    return doc
+
+@router.delete("/{id}", response_model=DocumentSchema)
+def delete_document(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+) -> Any:
+    doc = db.query(Document).filter(Document.id == id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    db.delete(doc)
+    db.commit()
     return doc

@@ -63,8 +63,13 @@ export default function ProjectDocuments({ projectId }) {
 
     const handleDelete = async (id) => {
         if (confirm("Dokument wirklich löschen?")) {
-            // await clientApi.deleteDocument(id);
-            console.warn("Delete document not implemented yet");
+            try {
+                await clientApi.deleteDocument(id);
+                loadDocuments();
+            } catch (error) {
+                console.error("Error deleting document:", error);
+                alert("Fehler beim Löschen des Dokuments");
+            }
         }
     };
 

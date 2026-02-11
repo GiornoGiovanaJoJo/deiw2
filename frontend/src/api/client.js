@@ -183,6 +183,9 @@ export const clientApi = {
     updateDocument: async (id, data) => {
         return api.put(`/documents/${id}`, data);
     },
+    deleteDocument: async (id) => {
+        return api.delete(`/documents/${id}`);
+    },
 
     // Tickets
     getTickets: async () => {
