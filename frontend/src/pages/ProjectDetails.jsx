@@ -8,8 +8,11 @@ import ProjectStages from "@/components/project/ProjectStages";
 import ProjectDocuments from "@/components/project/ProjectDocuments";
 
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function ProjectDetails() {
     const { id } = useParams();
+    const { user } = useAuth();
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -101,18 +104,22 @@ export default function ProjectDetails() {
                         >
                             Übersicht
                         </button>
-                        <button
-                            onClick={() => setActiveTab('stages')}
-                            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === 'stages' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            Phasen
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('docs')}
-                            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === 'docs' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            Dokumente
-                        </button>
+                        {user && (
+                            <>
+                                <button
+                                    onClick={() => setActiveTab('stages')}
+                                    className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === 'stages' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Phasen
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('docs')}
+                                    className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === 'docs' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Dokumente
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 

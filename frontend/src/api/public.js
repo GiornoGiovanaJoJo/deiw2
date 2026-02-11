@@ -12,7 +12,7 @@ export const publicApi = {
         return response.data;
     },
     getProjectById: async (id) => {
-        const response = await api.get(`/projects/${id}`);
+        const response = await api.get(`/projects/public/${id}`);
         return response.data;
     },
     submitInquiry: async (data) => {
