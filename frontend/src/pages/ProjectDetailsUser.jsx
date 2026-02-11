@@ -88,156 +88,157 @@ export default function ProjectDetailsUser() {
     if (!project) return null;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans">
+        <div className="min-h-screen bg-slate-50 font-sans text-slate-900 landing-page flex flex-col">
             <Header />
-            <div className="container mx-auto px-4 !pt-24 !pb-8 lg:!pt-32 lg:!pb-12">
-
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-6">
-                    <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
-                        <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold flex items-center gap-3">
-                            {project.name}
-                        </h1>
-                        <div className="flex items-center gap-3 mt-1">
-                            <Badge variant="outline">{project.status}</Badge>
-                            {project.projekt_nummer && <span className="text-slate-400 font-mono text-sm">{project.projekt_nummer}</span>}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation */}
-                <div className="flex gap-4 border-b border-slate-200 mb-6 overflow-x-auto">
-                    <button
-                        onClick={() => setActiveTab('overview')}
-                        className={`py-2 px-4 font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'overview' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                    >
-                        Übersicht
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('stages')}
-                        className={`py-2 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'stages' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                    >
-                        <Layers className="w-4 h-4" /> Phasen
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('documents')}
-                        className={`py-2 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'documents' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                    >
-                        <FileText className="w-4 h-4" /> Dokumente
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('chat')}
-                        className={`py-2 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'chat' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                    >
-                        <MessageSquare className="w-4 h-4" /> Chat zum Auftrag
-                    </button>
-                </div>
-
-                {/* Content */}
-                <div className="max-w-4xl">
-                    {activeTab === 'overview' && (
-                        <div className="grid gap-6 md:grid-cols-3">
-                            <Card className="md:col-span-2">
-                                <CardHeader><CardTitle>Beschreibung</CardTitle></CardHeader>
-                                <CardContent>
-                                    <p className="text-slate-600 whitespace-pre-wrap">{project.description || "Keine Beschreibung verfügbar."}</p>
-                                </CardContent>
-                            </Card>
-
-                            <div className="space-y-6">
-                                <Card>
-                                    <CardHeader><CardTitle>Details</CardTitle></CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="flex items-start gap-3">
-                                            <MapPin className="w-5 h-5 text-slate-400 mt-0.5" />
-                                            <div>
-                                                <p className="font-medium text-slate-900">Standort</p>
-                                                <p className="text-slate-500 text-sm">{project.address || "Keine Adresse"}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <Calendar className="w-5 h-5 text-slate-400 mt-0.5" />
-                                            <div>
-                                                <p className="font-medium text-slate-900">Zeitraum</p>
-                                                <p className="text-slate-500 text-sm">
-                                                    {project.start_date ? new Date(project.start_date).toLocaleDateString() : '-'}
-                                                    {' bis '}
-                                                    {project.end_date ? new Date(project.end_date).toLocaleDateString() : '-'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+            <main className="flex-1">
+                <div className="container mx-auto px-4 !pt-32 lg:!pt-40 pb-16">
+                    {/* Header */}
+                    <div className="flex items-center gap-4 mb-8">
+                        <Button variant="ghost" size="icon" onClick={() => navigate('/profile')} className="hover:bg-slate-200">
+                            <ArrowLeft className="w-5 h-5" />
+                        </Button>
+                        <div>
+                            <h1 className="text-3xl font-bold flex items-center gap-3">
+                                {project.name}
+                            </h1>
+                            <div className="flex items-center gap-3 mt-2">
+                                <Badge variant="outline" className="bg-white border-slate-300">{project.status}</Badge>
+                                {project.projekt_nummer && <span className="text-slate-500 font-mono text-sm">{project.projekt_nummer}</span>}
                             </div>
                         </div>
-                    )}
+                    </div>
 
-                    {activeTab === 'stages' && (
-                        <ProjectStages projectId={id} readOnly={true} />
-                    )}
+                    {/* Navigation */}
+                    <div className="flex gap-4 border-b border-slate-200 mb-8 overflow-x-auto pb-1">
+                        <button
+                            onClick={() => setActiveTab('overview')}
+                            className={`py-3 px-5 font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'overview' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                        >
+                            Übersicht
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('stages')}
+                            className={`py-3 px-5 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'stages' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                        >
+                            <Layers className="w-4 h-4" /> Phasen
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('documents')}
+                            className={`py-3 px-5 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'documents' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                        >
+                            <FileText className="w-4 h-4" /> Dokumente
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('chat')}
+                            className={`py-3 px-5 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'chat' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
+                        >
+                            <MessageSquare className="w-4 h-4" /> Chat zum Auftrag
+                        </button>
+                    </div>
 
-                    {activeTab === 'documents' && (
-                        <ProjectDocuments projectId={id} />
-                    )}
+                    {/* Content */}
+                    <div className="max-w-5xl mx-auto lg:mx-0">
+                        {activeTab === 'overview' && (
+                            <div className="grid gap-8 md:grid-cols-3">
+                                <Card className="md:col-span-2 shadow-sm border-slate-200">
+                                    <CardHeader><CardTitle>Beschreibung</CardTitle></CardHeader>
+                                    <CardContent>
+                                        <p className="text-slate-600 whitespace-pre-wrap leading-relaxed">{project.description || "Keine Beschreibung verfügbar."}</p>
+                                    </CardContent>
+                                </Card>
 
-                    {activeTab === 'chat' && (
-                        <Card className="h-[600px] flex flex-col">
-                            <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                                        <MessageSquare className="w-5 h-5 text-slate-500" />
-                                    </div>
-                                    <div>
-                                        <CardTitle>Projekt-Chat</CardTitle>
-                                        <p className="text-xs text-slate-500">Direkter Draht zu Ihrem Projektleiter</p>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-                                <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/30">
-                                    {messages.length === 0 && (
-                                        <div className="text-center text-slate-400 py-10">
-                                            Hier können Sie Fragen zu diesem Auftrag stellen.
-                                        </div>
-                                    )}
-                                    {messages.map((msg) => {
-                                        const isMe = msg.sender_id === user.id;
-                                        return (
-                                            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[75%] rounded-2xl p-4 shadow-sm ${isMe ? 'bg-[#7C3AED] text-white rounded-tr-none' : 'bg-white border border-slate-200 rounded-tl-none'}`}>
-                                                    <p className="text-sm">{msg.content}</p>
-                                                    <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-violet-200' : 'text-slate-400'}`}>
-                                                        {format(new Date(msg.timestamp), 'dd.MM.yyyy HH:mm')}
+                                <div className="space-y-6">
+                                    <Card className="shadow-sm border-slate-200">
+                                        <CardHeader><CardTitle>Details</CardTitle></CardHeader>
+                                        <CardContent className="space-y-6">
+                                            <div className="flex items-start gap-3">
+                                                <MapPin className="w-5 h-5 text-slate-400 mt-1" />
+                                                <div>
+                                                    <p className="font-medium text-slate-900">Standort</p>
+                                                    <p className="text-slate-500 text-sm">{project.address || "Keine Adresse"}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-3">
+                                                <Calendar className="w-5 h-5 text-slate-400 mt-1" />
+                                                <div>
+                                                    <p className="font-medium text-slate-900">Zeitraum</p>
+                                                    <p className="text-slate-500 text-sm">
+                                                        {project.start_date ? new Date(project.start_date).toLocaleDateString() : '-'}
+                                                        {' bis '}
+                                                        {project.end_date ? new Date(project.end_date).toLocaleDateString() : '-'}
                                                     </p>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                    <div ref={messagesEndRef} />
+                                        </CardContent>
+                                    </Card>
                                 </div>
+                            </div>
+                        )}
 
-                                <div className="p-4 bg-white border-t border-slate-100">
-                                    <form onSubmit={handleSendMessage} className="flex gap-3">
-                                        <Input
-                                            value={newMessage}
-                                            onChange={e => setNewMessage(e.target.value)}
-                                            placeholder="Nachricht schreiben..."
-                                            className="flex-1"
-                                            autoFocus
-                                        />
-                                        <Button type="submit" size="icon" className="bg-[#7C3AED] hover:bg-[#6D28D9]">
-                                            <Send className="w-4 h-4" />
-                                        </Button>
-                                    </form>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                        {activeTab === 'stages' && (
+                            <ProjectStages projectId={id} readOnly={true} />
+                        )}
+
+                        {activeTab === 'documents' && (
+                            <ProjectDocuments projectId={id} />
+                        )}
+
+                        {activeTab === 'chat' && (
+                            <Card className="h-[600px] flex flex-col shadow-sm border-slate-200">
+                                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                                            <MessageSquare className="w-5 h-5 text-slate-500" />
+                                        </div>
+                                        <div>
+                                            <CardTitle>Projekt-Chat</CardTitle>
+                                            <p className="text-xs text-slate-500">Direkter Draht zu Ihrem Projektleiter</p>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+                                    <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/30">
+                                        {messages.length === 0 && (
+                                            <div className="text-center text-slate-400 py-10">
+                                                Hier können Sie Fragen zu diesem Auftrag stellen.
+                                            </div>
+                                        )}
+                                        {messages.map((msg) => {
+                                            const isMe = msg.sender_id === user.id;
+                                            return (
+                                                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className={`max-w-[75%] rounded-2xl p-4 shadow-sm ${isMe ? 'bg-[#7C3AED] text-white rounded-tr-none' : 'bg-white border border-slate-200 rounded-tl-none'}`}>
+                                                        <p className="text-sm">{msg.content}</p>
+                                                        <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-violet-200' : 'text-slate-400'}`}>
+                                                            {format(new Date(msg.timestamp), 'dd.MM.yyyy HH:mm')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                        <div ref={messagesEndRef} />
+                                    </div>
+
+                                    <div className="p-4 bg-white border-t border-slate-100">
+                                        <form onSubmit={handleSendMessage} className="flex gap-3">
+                                            <Input
+                                                value={newMessage}
+                                                onChange={e => setNewMessage(e.target.value)}
+                                                placeholder="Nachricht schreiben..."
+                                                className="flex-1"
+                                                autoFocus
+                                            />
+                                            <Button type="submit" size="icon" className="bg-[#7C3AED] hover:bg-[#6D28D9]">
+                                                <Send className="w-4 h-4" />
+                                            </Button>
+                                        </form>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </main>
             <Footer />
         </div>
     );
