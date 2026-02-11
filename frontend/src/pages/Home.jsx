@@ -64,7 +64,23 @@ export default function Home() {
                 }
 
                 if (cats && cats.length > 0) {
-                    setServices(cats);
+                    // Build Tree
+                    const buildTree = (items) => {
+                        const map = {};
+                        const roots = [];
+                        items.forEach(item => {
+                            map[item.id] = { ...item, children: [] };
+                        });
+                        items.forEach(item => {
+                            if (item.parent_id && map[item.parent_id]) {
+                                map[item.parent_id].children.push(map[item.id]);
+                            } else {
+                                roots.push(map[item.id]);
+                            }
+                        });
+                        return roots;
+                    };
+                    setServices(buildTree(cats));
                 } else {
                     setServices([
                         { id: 1, name: 'Жилое строительство', description: 'Строительство современных жилых комплексов и частных домов под ключ.', icon_name: 'home' },

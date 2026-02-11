@@ -26,7 +26,11 @@ const STEPS = {
 export default function ServiceModal({ isOpen, onClose, category }) {
     const { user } = useAuth();
     const [step, setStep] = useState(STEPS.SERVICE);
-    const [selectedSubService, setSelectedSubService] = useState(null);
+
+    // Recursive Navigation State
+    const [breadcrumbs, setBreadcrumbs] = useState([]);
+    const [selectedSubService, setSelectedSubService] = useState(null); // The final leaf node
+
     const [selectedDate, setSelectedDate] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -44,6 +48,11 @@ export default function ServiceModal({ isOpen, onClose, category }) {
     React.useEffect(() => {
         if (isOpen) {
             setStep(STEPS.SERVICE);
+            // Initialize Breadcrumbs with the root category (if available)
+            // If category is null (shouldn't happen if isOpen is true), handle gracefully
+            if (category) {
+                setBreadcrumbs([category]);
+            }
             setSelectedSubService(null);
             setSelectedDate(null);
             setLoading(false);
@@ -62,48 +71,108 @@ export default function ServiceModal({ isOpen, onClose, category }) {
         }
     }, [isOpen, category, user]);
 
-    // Parse Modal Config
+    // Current View Context
+    const currentCategory = useMemo(() => {
+        if (breadcrumbs.length === 0) return category;
+        return breadcrumbs[breadcrumbs.length - 1];
+    }, [breadcrumbs, category]);
+
+    // Parse Modal Config (for current level or root)
+    // We might want config to inherit or be specific to the current node
     const config = useMemo(() => {
-        if (!category?.modal_config) return null;
+        const target = currentCategory || category;
+        if (!target?.modal_config) return null;
         try {
-            return typeof category.modal_config === 'string'
-                ? JSON.parse(category.modal_config)
-                : category.modal_config;
+            return typeof target.modal_config === 'string'
+                ? JSON.parse(target.modal_config)
+                : target.modal_config;
         } catch (e) {
             console.error("Invalid modal config", e);
             return null;
         }
-    }, [category]);
+    }, [currentCategory, category]);
 
-    // Mock sub-services or use Config/Children
-    const subServices = useMemo(() => {
-        if (!category) return [];
+    // Determine Options for Current Level
+    const currentOptions = useMemo(() => {
+        if (!currentCategory) return [];
 
-        // Priority 1: Config subServices
-        if (config?.subServices) return config.subServices;
+        // Priority 1: Config subServices (Virtual Children)
+        // If the current category has 'subServices' defined in JSON, these take precedence as "Children"
+        if (config?.subServices && Array.isArray(config.subServices) && config.subServices.length > 0) {
+            return config.subServices.map(s => ({ ...s, isVirtual: true }));
+        }
 
-        // Priority 2: Backend Children
-        if (category.children && category.children.length > 0) return category.children;
+        // Priority 2: Database Children (Nested Categories)
+        if (currentCategory.children && currentCategory.children.length > 0) {
+            return currentCategory.children;
+        }
 
-        // Priority 3: Fallback
-        return [
-            { id: '1', name: `Консультация: ${category.name}` },
-            { id: '2', name: `Расчет стоимости: ${category.name}` },
-            { id: '3', name: `Выезд специалиста` },
-        ];
-    }, [category, config]);
+        // Priority 3: Fallback (Only if Root and totally empty)
+        if (breadcrumbs.length === 1 && (!currentCategory.children || currentCategory.children.length === 0)) {
+            return [
+                { id: '1', name: `Консультация: ${currentCategory.name}`, isVirtual: true },
+                { id: '2', name: `Расчет стоимости`, isVirtual: true },
+                { id: '3', name: `Выезд специалиста`, isVirtual: true },
+            ];
+        }
 
-    const handleNext = () => {
-        if (step === STEPS.SERVICE && selectedSubService) {
+        return []; // Leaf Node logic handled in interaction
+    }, [currentCategory, config, breadcrumbs.length]);
+
+
+    const handleOptionClick = (option) => {
+        // Check if Option is a Leaf
+        // A helper logic: It's a leaf if it has NO children AND NO subServices config
+        // OR if it is marked as 'isVirtual' (from JSON config) -> JSON subServices are always leaves in this simple version
+
+        let isLeaf = false;
+
+        if (option.isVirtual) {
+            isLeaf = true;
+        } else {
+            // Check for DB children
+            const hasChildren = option.children && option.children.length > 0;
+            // Check for JSON config children (modal_config string or object)
+            let hasConfigChildren = false;
+            if (option.modal_config) {
+                try {
+                    const c = typeof option.modal_config === 'string' ? JSON.parse(option.modal_config) : option.modal_config;
+                    if (c?.subServices && c.subServices.length > 0) hasConfigChildren = true;
+                } catch (e) { }
+            }
+
+            if (!hasChildren && !hasConfigChildren) {
+                isLeaf = true;
+            }
+        }
+
+        if (isLeaf) {
+            setSelectedSubService(option);
             setStep(STEPS.DATE);
-        } else if (step === STEPS.DATE && selectedDate) {
-            setStep(STEPS.FORM);
+        } else {
+            // Dive deeper
+            setBreadcrumbs([...breadcrumbs, option]);
         }
     };
 
-    const handleBack = () => {
-        if (step === STEPS.DATE) setStep(STEPS.SERVICE);
-        if (step === STEPS.FORM) setStep(STEPS.DATE);
+    const handleBackStep = () => {
+        if (step === STEPS.SERVICE) {
+            if (breadcrumbs.length > 1) {
+                setBreadcrumbs(prev => prev.slice(0, -1));
+            } else {
+                onClose();
+            }
+        } else if (step === STEPS.DATE) {
+            setStep(STEPS.SERVICE);
+        } else if (step === STEPS.FORM) {
+            setStep(STEPS.DATE);
+        }
+    };
+
+    const handleNext = () => {
+        if (step === STEPS.DATE && selectedDate) {
+            setStep(STEPS.FORM);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -112,6 +181,19 @@ export default function ServiceModal({ isOpen, onClose, category }) {
         try {
             // Format dynamic fields into message
             let fullMessage = formData.message || '';
+
+            // Use config from the LEAF or the ROOT? 
+            // Usually the form configuration comes from the CATEGORY that defined the service.
+            // If we selected a 'Virtual' service from 'Renovation', 'Renovation' has the form config.
+            // If we navigated 'Renovation' -> 'Painting' (DB Category) -> 'Wall Painting' (Virtual), 
+            // 'Painting' might have its own form config?
+            // Let's use `config` derived from `currentCategory` (which is the parent of the selected leaf if leaf is virtual, OR the leaf itself if it was a DB category being treated as service).
+
+            // Correction: If `selectedSubService` is the service, we prefer ITS config if it exists (DB category), 
+            // otherwise the parent's config.
+
+            // Actually, `config` is computed from `currentCategory`. 
+            // If we are at 'Painting' (currentCategory) and picked 'Wall Painting' (Virtual), `config` is 'Painting's config. Correct.
 
             if (config?.fields) {
                 const dynamicDetails = config.fields
@@ -128,13 +210,16 @@ export default function ServiceModal({ isOpen, onClose, category }) {
                 fullMessage += `\nГород: ${formData.city}`;
             }
 
+            // Build Category Path String
+            const categoryPath = breadcrumbs.map(b => b.name).join(' > ');
+
             const ticketData = {
-                subject: `Заявка на услугу: ${category.name} - ${selectedSubService.name}`,
+                subject: `Заявка: ${selectedSubService.name}`,
                 message: fullMessage,
                 sender_name: formData.name,
                 sender_email: formData.email,
                 sender_phone: formData.phone,
-                category: category.name,
+                category: categoryPath, // Send full path
                 service_id: selectedSubService.id?.toString() || selectedSubService.name,
                 booking_date: selectedDate ? selectedDate.toISOString() : null,
                 source: "service_modal"
@@ -174,12 +259,22 @@ export default function ServiceModal({ isOpen, onClose, category }) {
             <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-50 gap-0 h-[600px] flex">
                 <DialogTitle className="sr-only">Бронирование услуги: {category.name}</DialogTitle>
 
-                {/* Visual Side (Left) - Hidden on mobile if needed, but keeping for design */}
+                {/* Visual Side (Left) */}
                 <div className="hidden md:flex w-1/3 bg-slate-900 text-white flex-col p-8 justify-between relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 z-0"></div>
                     <div className="relative z-10">
-                        <h2 className="text-3xl font-bold mb-4">{category.name}</h2>
-                        <p className="text-slate-300 text-sm leading-relaxed">{category.description}</p>
+                        {/* Show Root Category Name always? Or Current? */}
+                        {/* Showing Current is handy for navigation context */}
+                        <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
+                            {breadcrumbs.length > 1 && (
+                                <>
+                                    <span>{breadcrumbs[0].name}</span>
+                                    {breadcrumbs.length > 2 && <ChevronRight className="w-3 h-3" />}
+                                </>
+                            )}
+                        </div>
+                        <h2 className="text-3xl font-bold mb-4">{currentCategory?.name || category.name}</h2>
+                        <p className="text-slate-300 text-sm leading-relaxed">{currentCategory?.description || category.description}</p>
                     </div>
 
                     <div className="relative z-10 mt-auto">
@@ -210,28 +305,51 @@ export default function ServiceModal({ isOpen, onClose, category }) {
                 <div className="flex-1 flex flex-col w-full md:w-2/3 bg-white h-full overflow-y-auto relative">
                     <div className="p-8 flex-1">
 
-                        {/* Step 0: Service Selection */}
+                        {/* Step 0: Service Selection (Recursive) */}
                         {step === STEPS.SERVICE && (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                                <h3 className="text-2xl font-bold text-slate-900 mb-6">Выберите конкретную услугу</h3>
+                                {/* Breadcrumbs */}
+                                <div className="flex items-center flex-wrap gap-2 mb-6 text-sm text-slate-500">
+                                    {breadcrumbs.map((crumb, idx) => (
+                                        <React.Fragment key={crumb.id || idx}>
+                                            <button
+                                                onClick={() => setBreadcrumbs(breadcrumbs.slice(0, idx + 1))}
+                                                className={`hover:text-primary hover:underline transition-colors ${idx === breadcrumbs.length - 1 ? 'font-semibold text-slate-900 pointer-events-none' : ''}`}
+                                            >
+                                                {crumb.name}
+                                            </button>
+                                            {idx < breadcrumbs.length - 1 && <ChevronRight className="w-4 h-4" />}
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+
+                                <h3 className="text-2xl font-bold text-slate-900 mb-6">
+                                    {currentOptions.length > 0 ? "Выберите категорию или услугу" : "Услуга выбрана"}
+                                </h3>
+
                                 <div className="grid grid-cols-1 gap-3">
-                                    {subServices.map((sub) => (
+                                    {currentOptions.map((option, idx) => (
                                         <button
-                                            key={sub.id}
-                                            onClick={() => setSelectedSubService(sub)}
-                                            className={`p-4 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-center justify-between group
-                                                ${selectedSubService?.id === sub.id
-                                                    ? 'border-primary bg-primary/5 shadow-md'
-                                                    : 'border-slate-100 bg-white hover:bg-slate-50'}`}
+                                            key={option.id || idx}
+                                            onClick={() => handleOptionClick(option)}
+                                            className="p-4 rounded-xl border-2 text-left transition-all border-slate-100 bg-white hover:bg-slate-50 hover:border-primary/50 flex items-center justify-between group"
                                         >
-                                            <span className={`font-medium ${selectedSubService?.id === sub.id ? 'text-primary' : 'text-slate-700'}`}>
-                                                {sub.name}
-                                            </span>
-                                            {selectedSubService?.id === sub.id && (
-                                                <Check className="w-5 h-5 text-primary" />
-                                            )}
+                                            <div className="flex items-center gap-3">
+                                                {/* Icon? If option has icon_name */}
+                                                <span className="font-medium text-slate-700 group-hover:text-primary transition-colors">
+                                                    {option.name}
+                                                </span>
+                                            </div>
+                                            <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary transition-colors" />
                                         </button>
                                     ))}
+
+                                    {currentOptions.length === 0 && (
+                                        <div className="text-center py-12 border-2 border-dashed rounded-xl bg-slate-50">
+                                            <p className="text-slate-500">Нет доступных опций в этой категории.</p>
+                                            <Button variant="link" onClick={() => setStep(STEPS.DATE)}>Пропустить выбор услуги</Button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -395,12 +513,6 @@ export default function ServiceModal({ isOpen, onClose, category }) {
                                             </div>
                                         </>
                                     )}
-
-                                    {/* Always show Contact Info if using dynamic fields to ensure we get contact details? 
-                                        Actually, dynamic fields should probably include contact details or we append them.
-                                        For now, let's assume if 'fields' is defined, it REPLACES the default form. 
-                                        So the admin must include name/phone fields in their config if they want them.
-                                    */}
                                 </form>
                             </div>
                         )}
@@ -427,22 +539,19 @@ export default function ServiceModal({ isOpen, onClose, category }) {
                     {/* Navigation Buttons (Only for non-success steps) */}
                     {step !== STEPS.SUCCESS && (
                         <div className="p-6 border-t border-slate-100 flex justify-between items-center bg-white sticky bottom-0 z-10">
-                            {step > STEPS.SERVICE ? (
-                                <Button variant="outline" onClick={handleBack} className="gap-2">
-                                    <ArrowLeft className="w-4 h-4" /> Назад
-                                </Button>
-                            ) : (
-                                <div></div> // Spacer
-                            )}
+                            <Button variant="outline" onClick={handleBackStep} className="gap-2">
+                                <ArrowLeft className="w-4 h-4" />
+                                {step === STEPS.SERVICE && breadcrumbs.length <= 1 ? "Закрыть" : "Назад"}
+                            </Button>
 
                             {step < STEPS.FORM ? (
                                 <Button
                                     onClick={handleNext}
                                     disabled={
-                                        (step === STEPS.SERVICE && !selectedSubService) ||
+                                        (step === STEPS.SERVICE) || // In Step 0, click on item triggers next. Next button disabled here unless logic changes.
                                         (step === STEPS.DATE && !selectedDate)
                                     }
-                                    className="gap-2"
+                                    className={`gap-2 ${step === STEPS.SERVICE ? 'hidden' : ''}`} // Hide Next on Service selection, forcing item click?
                                 >
                                     Далее <ArrowRight className="w-4 h-4" />
                                 </Button>

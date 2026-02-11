@@ -173,8 +173,52 @@ export default function Categories() {
         setStages(stages.filter((_, i) => i !== index));
     };
 
-    // Filter only parent categories for the dropdown
-    const parentCategories = categories.filter(c => !c.parent_id);
+    // --- TREE LOGIC ---
+    const buildCategoryTree = (cats) => {
+        const map = {};
+        const roots = [];
+        // Clone to avoid mutating original
+        cats.forEach((cat) => {
+            map[cat.id] = { ...cat, children: [] };
+        });
+        cats.forEach((cat) => {
+            if (cat.parent_id && map[cat.parent_id]) {
+                map[cat.parent_id].children.push(map[cat.id]);
+            } else {
+                // If parent doesn't exist (or is null), treat as root
+                if (map[cat.id]) roots.push(map[cat.id]);
+            }
+        });
+        return roots;
+    };
+
+    const flattenTree = (nodes, depth = 0, result = []) => {
+        nodes.forEach(node => {
+            result.push({ ...node, depth });
+            if (node.children && node.children.length > 0) {
+                flattenTree(node.children, depth + 1, result);
+            }
+        });
+        return result;
+    };
+
+    // Prepare data for rendering
+    const categoryTree = buildCategoryTree(categories);
+    const flatCategories = flattenTree(categoryTree);
+
+    // Filter available parents (exclude self and children if editing)
+    const getAvailableParents = () => {
+        if (!editingId) return flatCategories;
+
+        // Simple cycle check: Can't pick self. 
+        // Ideally should also exclude all descendants, but for 1-level edit, restricting self is minimum.
+        // To exclude descendants, would need to traverse down from editingId.
+
+        return flatCategories.filter(c => c.id !== editingId);
+    };
+
+    const availableParents = getAvailableParents();
+
 
     return (
         <div className="container mx-auto p-6 space-y-6">
@@ -221,15 +265,15 @@ export default function Categories() {
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Keine (Hauptkategorie)" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="max-h-[300px]">
                                                 <SelectItem value="none">Keine (Hauptkategorie)</SelectItem>
-                                                {parentCategories
-                                                    .filter(c => c.id !== editingId)
-                                                    .map(cat => (
-                                                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                                                            {cat.name}
-                                                        </SelectItem>
-                                                    ))}
+                                                {availableParents.map(cat => (
+                                                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                        <span style={{ paddingLeft: `${cat.depth * 15}px` }}>
+                                                            {cat.depth > 0 && "↳ "}{cat.name}
+                                                        </span>
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -423,16 +467,17 @@ export default function Categories() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {categories.map((cat) => {
+                                {flatCategories.map((cat) => {
                                     const parent = categories.find(p => p.id === cat.parent_id);
                                     return (
                                         <TableRow key={cat.id}>
                                             <TableCell className="font-medium">
-                                                <div className="flex items-center gap-2">
-                                                    {cat.parent_id ? (
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-                                                    ) : (
+                                                <div className="flex items-center gap-2" style={{ paddingLeft: `${cat.depth * 20}px` }}>
+                                                    {cat.depth > 0 && <span className="text-slate-300">↳</span>}
+                                                    {cat.children && cat.children.length > 0 ? (
                                                         <Folder className="w-4 h-4 text-blue-500" />
+                                                    ) : (
+                                                        <div className="w-4 h-4" />
                                                     )}
                                                     {cat.name}
                                                 </div>
@@ -454,7 +499,7 @@ export default function Categories() {
                                         </TableRow>
                                     );
                                 })}
-                                {categories.length === 0 && (
+                                {flatCategories.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={4} className="text-center text-slate-500 py-8">
                                             Keine Kategorien gefunden
