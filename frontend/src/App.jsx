@@ -38,10 +38,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
+          <Route path="/" element={<Home />} />
+          <Route path="/projects/:id" element={<ProjectDetails />} />
+
           <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/projects/:id" element={<ProjectDetails />} />
           </Route>
 
           {/* Admin Routes with Layout */}
