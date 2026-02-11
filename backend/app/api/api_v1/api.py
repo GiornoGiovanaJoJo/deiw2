@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from app.api.api_v1.endpoints import (
     login, users, projects, tasks, categories, customers,
-    subcontractors, project_stages, documents, tickets, notes, comments, upload, messages, content
+    subcontractors, project_stages, documents, tickets, notes, comments, upload, messages, content,
+    products, product_logs, time_entries, cash_registers, cash_sales
 )
 
 

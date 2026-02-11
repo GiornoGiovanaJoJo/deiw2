@@ -21,6 +21,7 @@ export default function Home() {
     const [currentService, setCurrentService] = useState(0);
     const [visibleServices, setVisibleServices] = useState(1);
     const [heroContent, setHeroContent] = useState(null);
+    const [servicesContent, setServicesContent] = useState(null);
 
     // Modal State
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -39,7 +40,7 @@ export default function Home() {
     useEffect(() => {
         const loadPublicData = async () => {
             try {
-                const [cats, projs, heroData] = await Promise.all([
+                const [cats, projs, heroData, servicesData] = await Promise.all([
                     publicApi.getCategories().catch(err => {
                         console.error("Error fetching categories:", err);
                         return [];
@@ -48,11 +49,16 @@ export default function Home() {
                         console.error("Error fetching projects:", err);
                         return [];
                     }),
-                    publicApi.getContent('home_hero').catch(err => null)
+                    publicApi.getContent('home_hero').catch(err => null),
+                    publicApi.getContent('home_services').catch(err => null)
                 ]);
 
                 if (heroData) {
                     setHeroContent(heroData.content);
+                }
+
+                if (servicesData) {
+                    setServicesContent(servicesData.content);
                 }
 
                 if (cats && cats.length > 0) {
@@ -261,7 +267,7 @@ export default function Home() {
                 {/* Services */}
                 <section className="section services" id="services">
                     <div className="container">
-                        <h2 className="section__title animate-on-scroll mb-8">Наши услуги</h2>
+                        <h2 className="section__title animate-on-scroll mb-8">{servicesContent?.title || "Наши услуги"}</h2>
 
                         {loading ? (
                             <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>

@@ -14,7 +14,9 @@ export default function ContentManagement() {
         logo: '',
         images: []
     });
-    const [services, setServices] = useState([]);
+    const [servicesContent, setServicesContent] = useState({
+        title: 'Наши услуги'
+    });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -24,12 +26,14 @@ export default function ContentManagement() {
     const loadContent = async () => {
         setLoading(true);
         try {
-            const heroData = await publicApi.getContent('home_hero');
-            if (heroData) setHeroContent(heroData.content);
+            const [heroData, servicesData] = await Promise.all([
+                publicApi.getContent('home_hero'),
+                publicApi.getContent('home_services')
+            ]);
 
-            // Services are Categories with type 'Service' ideally, but current Home.jsx uses Categories.
-            // We might need a way to edit them here or in Categories page.
-            // For now, let's focus on Hero content.
+            if (heroData) setHeroContent(heroData.content);
+            if (servicesData) setServicesContent(servicesData.content);
+
         } catch (error) {
             console.error("Failed to load content", error);
         } finally {
@@ -43,6 +47,16 @@ export default function ContentManagement() {
             alert("Hero content updated successfully!");
         } catch (error) {
             console.error("Failed to update hero content", error);
+            alert("Failed to update content.");
+        }
+    };
+
+    const handleServicesSave = async () => {
+        try {
+            await clientApi.updateContent('home_services', { content: servicesContent });
+            alert("Services content updated successfully!");
+        } catch (error) {
+            console.error("Failed to update services content", error);
             alert("Failed to update content.");
         }
     };
@@ -161,10 +175,31 @@ export default function ContentManagement() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Services</CardTitle>
+                    <CardTitle>Home Page - Services Section</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-slate-500">Manage Services in the "Categories" section.</p>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="font-medium">Section Title</label>
+                        <Input
+                            value={servicesContent.title || ''}
+                            onChange={e => setServicesContent({ ...servicesContent, title: e.target.value })}
+                            placeholder="Наши услуги"
+                        />
+                    </div>
+
+                    <div className="pt-4">
+                        <Button onClick={handleServicesSave}>
+                            <Save className="w-4 h-4 mr-2" /> Save Changes
+                        </Button>
+                    </div>
+
+                    <div className="pt-4 border-t mt-4">
+                        <p className="text-sm text-slate-500">
+                            To add or edit individual services/categories, please use the
+                            <a href="/categories" className="text-blue-600 hover:underline mx-1">Categories</a>
+                            section.
+                        </p>
+                    </div>
                 </CardContent>
             </Card>
         </div>
