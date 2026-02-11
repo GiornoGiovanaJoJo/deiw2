@@ -13,8 +13,6 @@ import { Input } from "@/components/ui/input";
 import ProjectModal from "@/components/ProjectModal";
 import ProjectMaterials from "@/components/project/ProjectMaterials";
 import ProjectTime from "@/components/project/ProjectTime";
-import ProjectMaterials from "@/components/project/ProjectMaterials";
-import ProjectTime from "@/components/project/ProjectTime";
 import ProjectReports from "@/components/project/ProjectReports";
 import ProjectAcceptance from "@/components/project/ProjectAcceptance";
 
