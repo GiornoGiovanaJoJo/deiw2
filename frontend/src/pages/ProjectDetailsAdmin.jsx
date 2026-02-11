@@ -11,6 +11,12 @@ import { format } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { Input } from "@/components/ui/input";
 import ProjectModal from "@/components/ProjectModal";
+import ProjectMaterials from "@/components/project/ProjectMaterials";
+import ProjectTime from "@/components/project/ProjectTime";
+import ProjectMaterials from "@/components/project/ProjectMaterials";
+import ProjectTime from "@/components/project/ProjectTime";
+import ProjectReports from "@/components/project/ProjectReports";
+import ProjectAcceptance from "@/components/project/ProjectAcceptance";
 
 export default function ProjectDetailsAdmin() {
     const { id } = useParams();
@@ -207,9 +213,9 @@ export default function ProjectDetailsAdmin() {
             </div>
 
             {/* Tabs Navigation */}
-            <div className="border-b border-slate-200">
-                <nav className="flex space-x-8" aria-label="Tabs">
-                    {['overview', 'stages', 'documents', 'team', 'media', 'chat'].map((tab) => (
+            <div className="border-b border-slate-200 overflow-x-auto">
+                <nav className="flex space-x-6" aria-label="Tabs">
+                    {['overview', 'stages', 'materials', 'time', 'documents', 'team', 'media', 'chat', 'reports', 'acceptance'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -221,11 +227,15 @@ export default function ProjectDetailsAdmin() {
                             `}
                         >
                             {tab === 'overview' && 'Übersicht'}
-                            {tab === 'stages' && 'Phasen & Zeitplan'}
+                            {tab === 'stages' && 'Phasen'}
+                            {tab === 'materials' && 'Material'}
+                            {tab === 'time' && 'Zeit'}
                             {tab === 'documents' && 'Dokumente'}
-                            {tab === 'team' && 'Team & Partner'}
-                            {tab === 'media' && 'Fotos & Medien'}
-                            {tab === 'chat' && 'Kommunikation'}
+                            {tab === 'team' && 'Team'}
+                            {tab === 'media' && 'Medien'}
+                            {tab === 'chat' && 'Chat'}
+                            {tab === 'reports' && 'Berichte'}
+                            {tab === 'acceptance' && 'Abnahme'}
                         </button>
                     ))}
                 </nav>
@@ -300,6 +310,22 @@ export default function ProjectDetailsAdmin() {
 
                 {activeTab === 'stages' && (
                     <ProjectStages projectId={id} />
+                )}
+
+                {activeTab === 'materials' && (
+                    <ProjectMaterials projectId={id} />
+                )}
+
+                {activeTab === 'time' && (
+                    <ProjectTime projectId={id} />
+                )}
+
+                {activeTab === 'reports' && (
+                    <ProjectReports project={project} />
+                )}
+
+                {activeTab === 'acceptance' && (
+                    <ProjectAcceptance projectId={id} />
                 )}
 
                 {activeTab === 'documents' && (

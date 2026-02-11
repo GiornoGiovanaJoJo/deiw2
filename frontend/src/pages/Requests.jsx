@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { clientApi } from '@/api/client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import { Loader2, ArrowRight, CheckCircle2, XCircle, Mail, Phone, Calendar, User
 import { format } from 'date-fns';
 
 export default function Requests() {
+    const navigate = useNavigate();
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTicket, setSelectedTicket] = useState(null);
@@ -44,22 +46,23 @@ export default function Requests() {
         }
     };
 
-    const handleConvert = async (ticket) => {
-        if (!confirm("Möchten Sie diese Anfrage wirklich in ein Projekt umwandeln?")) return;
-
-        setConverting(true);
-        try {
-            await clientApi.convertTicketToProject(ticket.id);
-            // Refresh list
-            await loadTickets();
-            if (selectedTicket?.id === ticket.id) setSelectedTicket(null);
-            alert("Projekt wurde erfolgreich erstellt!");
-        } catch (error) {
-            console.error("Failed to convert ticket", error);
-            alert("Fehler bei der Umwandlung.");
-        } finally {
-            setConverting(false);
-        }
+    const handleConvert = (ticket) => {
+        // Navigate to ProjectNew with pre-filled data via state
+        navigate('/projects/new', {
+            state: {
+                ticketConversion: true,
+                ticketData: {
+                    name: ticket.subject,
+                    description: ticket.message,
+                    customer: {
+                        name: ticket.sender_name,
+                        email: ticket.sender_email,
+                        phone: ticket.sender_phone
+                    },
+                    requestId: ticket.id
+                }
+            }
+        });
     };
 
     const getStatusBadge = (status) => {

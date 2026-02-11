@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { clientApi } from '@/api/client';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,16 +12,19 @@ import { Link } from 'react-router-dom';
 export default function ProjectNew() {
     const navigate = useNavigate();
     const { id } = useParams();
+    const location = useLocation();
     const isEditMode = !!id;
+    const ticketData = location.state?.ticketData;
 
     const [loading, setLoading] = useState(false);
     const [customers, setCustomers] = useState([]);
     const [categories, setCategories] = useState([]);
     const [users, setUsers] = useState([]); // For Projektleiter selection
+    const [subcontractors, setSubcontractors] = useState([]);
 
     const [form, setForm] = useState({
-        name: '',
-        description: '',
+        name: ticketData?.name || '',
+        description: ticketData?.description || '',
         status: 'Geplant',
         priority: 'Mittel',
         start_date: '',
@@ -31,6 +34,9 @@ export default function ProjectNew() {
         customer_id: '',
         category_id: '',
         projektleiter_id: '',
+        gruppenleiter_ids: [],
+        worker_ids: [],
+        subcontractor_ids: [],
         main_image: '',
         photos: [], // Gallery
         files: []   // Documents
@@ -42,11 +48,13 @@ export default function ProjectNew() {
                 const [custRes, catRes, usersRes] = await Promise.all([
                     clientApi.getCustomers(),
                     clientApi.getCategories(),
-                    clientApi.getAllUsers()
+                    clientApi.getAllUsers(),
+                    clientApi.getSubcontractors()
                 ]);
                 setCustomers(custRes.data);
                 setCategories(catRes.data);
                 setUsers(usersRes.data);
+                setSubcontractors(subRes.data);
             } catch (error) {
                 console.error("Failed to load dependency data", error);
             }
@@ -72,6 +80,9 @@ export default function ProjectNew() {
                     customer_id: project.customer_id || '',
                     category_id: project.category_id || '',
                     projektleiter_id: project.projektleiter_id || '',
+                    gruppenleiter_ids: project.gruppenleiter ? project.gruppenleiter.map(u => u.id) : [],
+                    worker_ids: project.workers ? project.workers.map(u => u.id) : [],
+                    subcontractor_ids: project.subcontractors ? project.subcontractors.map(s => s.id) : [],
                     main_image: project.main_image || '',
                     photos: project.photos || [],
                     files: project.files || []
@@ -99,6 +110,9 @@ export default function ProjectNew() {
                 customer_id: form.customer_id ? parseInt(form.customer_id) : null,
                 category_id: form.category_id ? parseInt(form.category_id) : null,
                 projektleiter_id: form.projektleiter_id ? parseInt(form.projektleiter_id) : null,
+                gruppenleiter_ids: form.gruppenleiter_ids.map(id => parseInt(id)),
+                worker_ids: form.worker_ids.map(id => parseInt(id)),
+                subcontractor_ids: form.subcontractor_ids.map(id => parseInt(id)),
                 main_image: form.main_image,
                 photos: form.photos,
                 files: form.files
@@ -107,7 +121,15 @@ export default function ProjectNew() {
             if (isEditMode) {
                 await clientApi.updateProject(id, payload);
             } else {
-                await clientApi.createProject(payload);
+                const res = await clientApi.createProject(payload);
+                // If this was a ticket conversion, close the ticket and link it
+                if (ticketData?.requestId) {
+                    await clientApi.updateTicket(ticketData.requestId, {
+                        status: 'Geschlossen',
+                        response: `In Projekt umgewandelt: ${res.data.name}`
+                    });
+                    // Link project to ticket if backend supports it (optional/future)
+                }
             }
             navigate(isEditMode ? `/projects/${id}` : '/projects');
         } catch (error) {
@@ -188,6 +210,69 @@ export default function ProjectNew() {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="gruppenleiter">Gruppenleiter</Label>
+                                <select
+                                    id="gruppenleiter"
+                                    multiple
+                                    className="flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 h-32"
+                                    value={form.gruppenleiter_ids}
+                                    onChange={e => {
+                                        const values = Array.from(e.target.selectedOptions, option => option.value);
+                                        setForm({ ...form, gruppenleiter_ids: values });
+                                    }}
+                                >
+                                    {users.filter(u => u.role === 'Gruppenleiter' || u.role === 'Admin' || u.role === 'Projektleiter').map(u => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.first_name} {u.last_name} ({u.role})
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-slate-500">Strg+Klick für Mehrfachauswahl</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="workers">Mitarbeiter (Worker)</Label>
+                                <select
+                                    id="workers"
+                                    multiple
+                                    className="flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 h-32"
+                                    value={form.worker_ids}
+                                    onChange={e => {
+                                        const values = Array.from(e.target.selectedOptions, option => option.value);
+                                        setForm({ ...form, worker_ids: values });
+                                    }}
+                                >
+                                    {users.filter(u => u.role === 'Worker').map(u => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.first_name} {u.last_name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-slate-500">Strg+Klick für Mehrfachauswahl</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="subcontractors">Subunternehmer</Label>
+                                <select
+                                    id="subcontractors"
+                                    multiple
+                                    className="flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 h-32"
+                                    value={form.subcontractor_ids}
+                                    onChange={e => {
+                                        const values = Array.from(e.target.selectedOptions, option => option.value);
+                                        setForm({ ...form, subcontractor_ids: values });
+                                    }}
+                                >
+                                    {subcontractors.map(s => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.company_name} ({s.trade})
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-slate-500">Strg+Klick für Mehrfachauswahl</p>
                             </div>
 
                             <div className="space-y-2">

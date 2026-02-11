@@ -57,5 +57,36 @@
         "users": "Users",
         "content": "Content",
         "logout": "Logout"
+    },
+    "projects_page": {
+        "title": "Projects",
+        "new_project": "New Project",
+        "overview": "Project Overview",
+        "search_placeholder": "Search by name or number...",
+        "all_statuses": "All Statuses",
+        "status": {
+            "planned": "Planned",
+            "in_progress": "In Progress",
+            "completed": "Completed",
+            "paused": "Paused",
+            "cancelled": "Cancelled"
+        },
+        "table": {
+            "number": "Number",
+            "name": "Name",
+            "status": "Status",
+            "period": "Period",
+            "actions": "Actions",
+            "loading": "Loading...",
+            "empty": "No projects found"
+        },
+        "delete_confirm": "Are you sure you want to delete this project?",
+        "delete_error": "Error deleting project.",
+        "actions": {
+            "manage": "Manage (Photos, Docs, Chat)",
+            "edit": "Edit",
+            "view": "View",
+            "delete": "Delete"
+        }
     }
 }

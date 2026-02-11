@@ -43,19 +43,50 @@
         "subtitle": "Свяжитесь с нами — ответим в течение 15 минут и обсудим вашу задачу."
     },
     "admin": {
-        "dashboard": "Dashboard",
-        "projects": "Projekte",
-        "tasks": "Aufgaben",
-        "support": "Support",
-        "customers": "Kunden",
-        "warehouse": "Lager",
-        "terminal": "Terminal",
-        "times": "Zeiten",
-        "finance": "Finanzen",
-        "partners": "Partner",
-        "categories": "Kategorien",
-        "users": "Benutzer",
-        "content": "Inhalt",
-        "logout": "Abmelden"
+        "dashboard": "Панель управления",
+        "projects": "Проекты",
+        "tasks": "Задачи",
+        "support": "Поддержка",
+        "customers": "Клиенты",
+        "warehouse": "Склад",
+        "terminal": "Терминал",
+        "times": "Время",
+        "finance": "Финансы",
+        "partners": "Партнеры",
+        "categories": "Категории",
+        "users": "Пользователи",
+        "content": "Контент",
+        "logout": "Выйти"
+    },
+    "projects_page": {
+        "title": "Проекты",
+        "new_project": "Новый проект",
+        "overview": "Обзор проектов",
+        "search_placeholder": "Поиск по имени или номеру...",
+        "all_statuses": "Все статусы",
+        "status": {
+            "planned": "Запланировано",
+            "in_progress": "В работе",
+            "completed": "Завершено",
+            "paused": "На паузе",
+            "cancelled": "Отменено"
+        },
+        "table": {
+            "number": "Номер",
+            "name": "Название",
+            "status": "Статус",
+            "period": "Период",
+            "actions": "Действия",
+            "loading": "Загрузка...",
+            "empty": "Проекты не найдены"
+        },
+        "delete_confirm": "Вы уверены, что хотите удалить этот проект?",
+        "delete_error": "Ошибка при удалении проекта.",
+        "actions": {
+            "manage": "Управление (Фото, Доки, Чат)",
+            "edit": "Редактировать",
+            "view": "Просмотр",
+            "delete": "Удалить"
+        }
     }
 }

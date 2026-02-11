@@ -12,6 +12,7 @@ import ProjectDetails from '@/pages/ProjectDetails';
 import Waren from '@/pages/Waren';
 import Terminal from '@/pages/Terminal';
 import Zeiterfassung from '@/pages/Zeiterfassung';
+import TimeTerminal from '@/pages/TimeTerminal';
 import Finance from '@/pages/Finance';
 import Subcontractors from '@/pages/Subcontractors';
 import Projects from '@/pages/Projects';
@@ -65,6 +66,7 @@ function App() {
               <Route path="/content" element={<ContentManagement />} />
               <Route path="/terminal" element={<Terminal />} />
               <Route path="/time-tracking" element={<Zeiterfassung />} />
+              <Route path="/time-terminal" element={<TimeTerminal />} />
               <Route path="/finance" element={<Finance />} />
               <Route path="/subcontractors" element={<Subcontractors />} />
               <Route path="/projects" element={<Projects />} />

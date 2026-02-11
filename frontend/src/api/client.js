@@ -223,6 +223,12 @@ export const clientApi = {
     uploadFile: (formData) => api.post('/upload/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     }),
+    getMessages: async (projectId) => {
+        return api.get(`/messages/?project_id=${projectId}`);
+    },
+    sendMessage: async (data) => {
+        return api.post('/messages/', data);
+    },
 };
 
 

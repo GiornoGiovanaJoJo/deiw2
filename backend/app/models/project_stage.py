@@ -16,5 +16,6 @@ class ProjectStage(Base):
     images = Column(JSON, default=list)
     status = Column(String, default=StageStatus.PLANNED)
     order = Column(Integer, default=0)
+    client_visible = Column(Boolean, default=False)
 
     project = relationship("Projekt", backref="stages")

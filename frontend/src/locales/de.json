@@ -57,5 +57,36 @@
         "users": "Benutzer",
         "content": "Inhalt",
         "logout": "Abmelden"
+    },
+    "projects_page": {
+        "title": "Projekte",
+        "new_project": "Neues Projekt",
+        "overview": "Projektübersicht",
+        "search_placeholder": "Suche nach Name oder Nummer...",
+        "all_statuses": "Alle Status",
+        "status": {
+            "planned": "Geplant",
+            "in_progress": "In Bearbeitung",
+            "completed": "Abgeschlossen",
+            "paused": "Pausiert",
+            "cancelled": "Storniert"
+        },
+        "table": {
+            "number": "Nummer",
+            "name": "Name",
+            "status": "Status",
+            "period": "Zeitraum",
+            "actions": "Aktionen",
+            "loading": "Laden...",
+            "empty": "Keine Projekte gefunden"
+        },
+        "delete_confirm": "Sind Sie sicher, dass Sie dieses Projekt löschen möchten?",
+        "delete_error": "Fehler beim Löschen des Projekts.",
+        "actions": {
+            "manage": "Verwalten (Fotos, Docs, Chat)",
+            "edit": "Bearbeiten",
+            "view": "Ansehen",
+            "delete": "Löschen"
+        }
     }
 }

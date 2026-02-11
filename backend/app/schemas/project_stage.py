@@ -8,6 +8,7 @@ class ProjectStageBase(BaseModel):
     images: Optional[List[str]] = []
     status: Optional[str] = "Geplant"
     order: Optional[int] = 0
+    client_visible: Optional[bool] = False
 
 class ProjectStageCreate(ProjectStageBase):
     pass

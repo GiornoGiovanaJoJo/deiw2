@@ -21,6 +21,7 @@ import {
     History,
     DollarSign,
     MessageSquare,
+    Clock,
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from './LanguageSwitcher';
@@ -42,6 +43,7 @@ export default function Layout() {
         { name: 'Customers', path: '/customers', icon: Users, roles: ['Admin', 'Projektleiter', 'Büro'] },
         { name: 'Warehouse', path: '/warehouse', icon: Box, roles: ['Admin', 'Projektleiter', 'Worker'] },
         { name: 'Terminal', path: '/terminal', icon: Monitor, roles: ['Admin', 'Projektleiter'] },
+        { name: 'Time Terminal', path: '/time-terminal', icon: Clock, roles: ['Admin', 'Projektleiter', 'Worker'] },
         { name: 'Time Tracking', path: '/time-tracking', icon: FileText, roles: ['Admin', 'Projektleiter', 'Worker'] },
         { name: 'Warehouse Logs', path: '/warehouse/logs', icon: History, roles: ['Admin', 'Projektleiter', 'Worker'] },
         { name: 'Cash Register', path: '/warehouse/cash-register', icon: DollarSign, roles: ['Admin', 'Projektleiter', 'Worker'] },
