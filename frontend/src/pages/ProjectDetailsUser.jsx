@@ -128,12 +128,6 @@ export default function ProjectDetailsUser() {
                         >
                             <FileText className="w-4 h-4" /> Dokumente
                         </button>
-                        <button
-                            onClick={() => setActiveTab('chat')}
-                            className={`py-3 px-5 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'chat' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}
-                        >
-                            <MessageSquare className="w-4 h-4" /> Chat zum Auftrag
-                        </button>
                     </div>
 
                     {/* Content */}
@@ -181,60 +175,6 @@ export default function ProjectDetailsUser() {
 
                         {activeTab === 'documents' && (
                             <ProjectDocuments projectId={id} />
-                        )}
-
-                        {activeTab === 'chat' && (
-                            <Card className="h-[600px] flex flex-col shadow-sm border-slate-200">
-                                <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                                            <MessageSquare className="w-5 h-5 text-slate-500" />
-                                        </div>
-                                        <div>
-                                            <CardTitle>Projekt-Chat</CardTitle>
-                                            <p className="text-xs text-slate-500">Direkter Draht zu Ihrem Projektleiter</p>
-                                        </div>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-                                    <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/30">
-                                        {messages.length === 0 && (
-                                            <div className="text-center text-slate-400 py-10">
-                                                Hier können Sie Fragen zu diesem Auftrag stellen.
-                                            </div>
-                                        )}
-                                        {messages.map((msg) => {
-                                            const isMe = msg.sender_id === user.id;
-                                            return (
-                                                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                    <div className={`max-w-[75%] rounded-2xl p-4 shadow-sm ${isMe ? 'bg-[#7C3AED] text-white rounded-tr-none' : 'bg-white border border-slate-200 rounded-tl-none'}`}>
-                                                        <p className="text-sm">{msg.content}</p>
-                                                        <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-violet-200' : 'text-slate-400'}`}>
-                                                            {format(new Date(msg.timestamp), 'dd.MM.yyyy HH:mm')}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                        <div ref={messagesEndRef} />
-                                    </div>
-
-                                    <div className="p-4 bg-white border-t border-slate-100">
-                                        <form onSubmit={handleSendMessage} className="flex gap-3">
-                                            <Input
-                                                value={newMessage}
-                                                onChange={e => setNewMessage(e.target.value)}
-                                                placeholder="Nachricht schreiben..."
-                                                className="flex-1"
-                                                autoFocus
-                                            />
-                                            <Button type="submit" size="icon" className="bg-[#7C3AED] hover:bg-[#6D28D9]">
-                                                <Send className="w-4 h-4" />
-                                            </Button>
-                                        </form>
-                                    </div>
-                                </CardContent>
-                            </Card>
                         )}
                     </div>
                 </div>

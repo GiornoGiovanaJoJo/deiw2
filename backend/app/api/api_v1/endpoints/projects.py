@@ -148,6 +148,26 @@ def create_project(
     db.add(project)
     db.commit()
     db.refresh(project)
+
+    # Copy Default Stages from Category
+    if project.category_id:
+        from app.models.category import Category
+        category = db.query(Category).filter(Category.id == project.category_id).first()
+        if category and category.modal_config:
+            stages_config = category.modal_config.get("stages", [])
+            if stages_config:
+                from app.models.project_stage import ProjectStage
+                for stage_data in stages_config:
+                    new_stage = ProjectStage(
+                        project_id=project.id,
+                        name=stage_data.get("name", "Unnamed Phase"),
+                        status=stage_data.get("status", "Geplant"),
+                        order=int(stage_data.get("order", 0)),
+                        description=f"Standard Phase aus Kategorie {category.name}"
+                    )
+                    db.add(new_stage)
+                db.commit()
+
     return project
 
 @router.put("/{project_id}", response_model=Project)

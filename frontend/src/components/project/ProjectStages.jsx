@@ -18,7 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, CheckCircle2, Circle } from "lucide-react";
+import { Plus, Pencil, Trash2, CheckCircle2, Circle, Image as ImageIcon, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 export default function ProjectStages({ projectId, readOnly = false }) {
@@ -32,7 +32,8 @@ export default function ProjectStages({ projectId, readOnly = false }) {
         status: "Geplant",
         start_date: "",
         end_date: "",
-        order: 0
+        order: 0,
+        images: []
     });
 
     useEffect(() => {
@@ -79,6 +80,30 @@ export default function ProjectStages({ projectId, readOnly = false }) {
         }
     };
 
+    const handleImageUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        try {
+            const newImages = [];
+            for (const file of files) {
+                const uploadRes = await clientApi.uploadImage(file);
+                newImages.push(uploadRes.data.url);
+            }
+            setForm(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
+        } catch (error) {
+            console.error("Failed to upload stage images", error);
+            alert("Fehler beim Hochladen der Bilder");
+        }
+    };
+
+    const removeImage = (indexToRemove) => {
+        setForm(prev => ({
+            ...prev,
+            images: prev.images.filter((_, index) => index !== indexToRemove)
+        }));
+    };
+
     const openNewDialog = () => {
         setEditingStage(null);
         setForm({
@@ -87,7 +112,8 @@ export default function ProjectStages({ projectId, readOnly = false }) {
             status: "Geplant",
             start_date: "",
             end_date: "",
-            order: stages.length + 1
+            order: stages.length + 1,
+            images: []
         });
         setDialogOpen(true);
     };
@@ -100,7 +126,8 @@ export default function ProjectStages({ projectId, readOnly = false }) {
             status: stage.status,
             start_date: stage.start_date || "",
             end_date: stage.end_date || "",
-            order: stage.order
+            order: stage.order,
+            images: stage.images || []
         });
         setDialogOpen(true);
     };
@@ -132,37 +159,52 @@ export default function ProjectStages({ projectId, readOnly = false }) {
                 ) : (
                     stages.map((stage) => (
                         <Card key={stage.id} className="overflow-hidden">
-                            <div className="p-4 flex items-start gap-4">
-                                <div className="mt-1">
-                                    {stage.status === "Abgeschlossen" ? (
-                                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                                    ) : (
-                                        <Circle className="w-5 h-5 text-slate-300" />
+                            <div className="p-4 flex flex-col gap-4">
+                                <div className="flex items-start gap-4">
+                                    <div className="mt-1">
+                                        {stage.status === "Abgeschlossen" ? (
+                                            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                        ) : (
+                                            <Circle className="w-5 h-5 text-slate-300" />
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="font-medium text-slate-900">{stage.name}</h4>
+                                            <Badge className={statusColors[stage.status] || "bg-slate-100"}>
+                                                {stage.status}
+                                            </Badge>
+                                        </div>
+                                        {stage.description && (
+                                            <p className="text-sm text-slate-600 mt-1">{stage.description}</p>
+                                        )}
+                                        <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                                            {stage.start_date && <span>Start: {stage.start_date}</span>}
+                                            {stage.end_date && <span>Ende: {stage.end_date}</span>}
+                                        </div>
+                                    </div>
+                                    {!readOnly && (
+                                        <div className="flex gap-1">
+                                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(stage)}>
+                                                <Pencil className="w-4 h-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(stage.id)}>
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="font-medium text-slate-900">{stage.name}</h4>
-                                        <Badge className={statusColors[stage.status] || "bg-slate-100"}>
-                                            {stage.status}
-                                        </Badge>
-                                    </div>
-                                    {stage.description && (
-                                        <p className="text-sm text-slate-600 mt-1">{stage.description}</p>
-                                    )}
-                                    <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-                                        {stage.start_date && <span>Start: {stage.start_date}</span>}
-                                        {stage.end_date && <span>Ende: {stage.end_date}</span>}
-                                    </div>
-                                </div>
-                                {!readOnly && (
-                                    <div className="flex gap-1">
-                                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(stage)}>
-                                            <Pencil className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(stage.id)}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+
+                                {/* Stage Images Display */}
+                                {stage.images && stage.images.length > 0 && (
+                                    <div className="pl-9 mt-2">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                            {stage.images.map((img, idx) => (
+                                                <div key={idx} className="aspect-square rounded-md overflow-hidden border bg-slate-50">
+                                                    <img src={img} alt={`Phase ${idx}`} className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform" onClick={() => window.open(img, '_blank')} />
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -172,11 +214,11 @@ export default function ProjectStages({ projectId, readOnly = false }) {
             </div>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent>
+                <DialogContent className="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>{editingStage ? "Phase bearbeiten" : "Neue Phase"}</DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-1">
                         <div className="space-y-2">
                             <Label>Name</Label>
                             <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
@@ -213,6 +255,30 @@ export default function ProjectStages({ projectId, readOnly = false }) {
                             <div className="space-y-2">
                                 <Label>Enddatum</Label>
                                 <Input type="date" value={form.end_date} onChange={e => setForm({ ...form, end_date: e.target.value })} />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Fotos</Label>
+                            <div className="border border-dashed rounded-lg p-4 bg-slate-50">
+                                <div className="grid grid-cols-3 md:grid-cols-4 gap-4 mb-4">
+                                    {form.images.map((img, idx) => (
+                                        <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-white border group">
+                                            <img src={img} alt="" className="w-full h-full object-cover" />
+                                            <button
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => removeImage(idx)}
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <label className="aspect-square rounded-md border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-slate-400 hover:bg-slate-100 transition-colors">
+                                        <ImageIcon className="w-6 h-6 text-slate-400 mb-1" />
+                                        <span className="text-xs text-slate-500">Upload</span>
+                                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>

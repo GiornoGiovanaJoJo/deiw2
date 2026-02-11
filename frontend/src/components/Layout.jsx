@@ -20,6 +20,7 @@ import {
     UserCheck,
     History,
     DollarSign,
+    MessageSquare,
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from './LanguageSwitcher';
@@ -33,6 +34,7 @@ export default function Layout() {
 
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro', 'Worker'] },
+        { name: 'Anfragen', path: '/requests', icon: MessageSquare, roles: ['Admin', 'Projektleiter', 'Büro'] },
         { name: 'Tasks', path: '/tasks', icon: ListTodo, roles: ['Admin', 'Projektleiter', 'Worker'] },
         { name: 'Projects', path: '/projects', icon: Briefcase, roles: ['Admin', 'Projektleiter', 'Gruppenleiter'] },
         { name: 'Support', path: '/support', icon: ClipboardList, roles: ['Admin', 'Projektleiter', 'Büro'] },

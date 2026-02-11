@@ -32,6 +32,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
 
 
+import Requests from '@/pages/Requests';
+
 function App() {
   return (
     <AuthProvider>
@@ -52,6 +54,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro', 'Worker']} />}>
             <Route element={<Layout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/requests" element={<Requests />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/support" element={<Support />} />
               <Route path="/categories" element={<Categories />} />
