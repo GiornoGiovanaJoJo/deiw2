@@ -24,13 +24,13 @@ export default function Layout() {
     const isActive = (path) => location.pathname === path;
 
     const navItems = [
-        { name: 'Dashboard', path: '/admin', icon: LayoutDashboard, roles: ['admin', 'manager', 'employee'] },
-        { name: 'Users', path: '/admin/users', icon: Users, roles: ['admin'] },
-        { name: 'Projects', path: '/admin/projects', icon: Briefcase, roles: ['admin', 'manager'] },
-        { name: 'Warehouse', path: '/admin/warehouse', icon: Box, roles: ['admin', 'manager', 'employee'] },
-        { name: 'Requests', path: '/admin/requests', icon: ClipboardList, roles: ['admin', 'manager'] },
-        { name: 'Reports', path: '/admin/reports', icon: FileText, roles: ['admin'] },
-        { name: 'Content Management', path: '/admin/content', icon: Settings, roles: ['admin'] },
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro', 'Worker'] },
+        { name: 'Users', path: '/users', icon: Users, roles: ['Admin'] },
+        { name: 'Projects', path: '/projects', icon: Briefcase, roles: ['Admin', 'Projektleiter', 'Gruppenleiter'] },
+        { name: 'Warehouse', path: '/warehouse', icon: Box, roles: ['Admin', 'Projektleiter', 'Worker'] },
+        { name: 'Requests', path: '/support', icon: ClipboardList, roles: ['Admin', 'Projektleiter', 'Büro'] },
+        { name: 'Time Tracking', path: '/time-tracking', icon: FileText, roles: ['Admin', 'Projektleiter', 'Worker'] },
+        { name: 'Content Management', path: '/content', icon: Settings, roles: ['Admin'] },
     ];
 
     const filteredNavItems = navItems.filter(item =>
@@ -43,7 +43,7 @@ export default function Layout() {
             <aside className={`
                 fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                lg:relative lg:translate-x-0
+                lg:static lg:translate-x-0
             `}>
                 <div className="p-6 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Empire Premium</h1>

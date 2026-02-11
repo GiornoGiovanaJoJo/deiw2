@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Globe, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-export default function LanguageSwitcher({ className, showLabel = true }) {
+export default function LanguageSwitcher({ className, showLabel = true, inline = false }) {
     const { i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -26,19 +26,27 @@ export default function LanguageSwitcher({ className, showLabel = true }) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 w-full justify-between"
             >
-                <Globe className="w-4 h-4" />
-                {showLabel && <span>{currentLang.name}</span>}
+                <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    {showLabel && <span>{currentLang.name}</span>}
+                </div>
+                {inline && <span className="transform transition-transform duration-200">{isOpen ? '▲' : '▼'}</span>}
             </Button>
 
             {isOpen && (
                 <>
-                    <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setIsOpen(false)}
-                    />
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 py-1">
+                    {!inline && (
+                        <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsOpen(false)}
+                        />
+                    )}
+                    <div className={inline
+                        ? "mt-2 w-full bg-slate-50 rounded-md py-1 space-y-1"
+                        : "absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 py-1"
+                    }>
                         {languages.map((lang) => (
                             <button
                                 key={lang.code}
@@ -47,6 +55,7 @@ export default function LanguageSwitcher({ className, showLabel = true }) {
                                     w-full text-left px-4 py-2 text-sm flex items-center justify-between
                                     hover:bg-gray-100 transition-colors
                                     ${i18n.language === lang.code ? 'text-indigo-600 font-medium' : 'text-gray-700'}
+                                    ${inline ? 'pl-8' : ''}
                                 `}
                             >
                                 <span className="flex items-center gap-2">

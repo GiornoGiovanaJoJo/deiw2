@@ -92,7 +92,7 @@ export default function Header() {
 
                     <div className="header__cta">
                         {user ? (
-                            <div className="flex items-center gap-4">
+                            <div className="hidden lg:flex items-center gap-4">
                                 <Link to="/profile" className="text-sm font-medium hover:text-primary">
                                     {user.first_name || t('nav.profile')}
                                 </Link>
@@ -101,7 +101,7 @@ export default function Header() {
                                 </Button>
                             </div>
                         ) : (
-                            <Link to="/login" className="btn btn--gold">
+                            <Link to="/login" className="hidden lg:flex btn btn--gold">
                                 {t('nav.login')}
                             </Link>
                         )}
@@ -139,7 +139,7 @@ export default function Header() {
 
                     <nav className="flex-1 overflow-y-auto py-6 px-6 flex flex-col gap-2">
                         <div className="mb-4">
-                            <LanguageSwitcher className="w-full justify-start" />
+                            <LanguageSwitcher className="w-full justify-start" inline={true} />
                         </div>
                         <button onClick={() => scrollToSection('about')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">{t('nav.about')}</button>
                         <button onClick={() => scrollToSection('services')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">{t('nav.services')}</button>
