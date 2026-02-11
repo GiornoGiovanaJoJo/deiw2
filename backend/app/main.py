@@ -33,12 +33,12 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend", "dist")
 
 if os.path.exists(static_dir):
-    app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="assets")
-
-    # Mount uploads directory
+    # Mount uploads directory - MUST BE BEFORE /assets to avoid shadowing
     uploads_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "uploads")
     os.makedirs(uploads_dir, exist_ok=True)
     app.mount("/assets/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
+    app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="assets")
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
