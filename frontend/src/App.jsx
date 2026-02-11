@@ -22,6 +22,7 @@ import Tasks from '@/pages/Tasks';
 import Support from '@/pages/Support';
 import ProductLogs from '@/pages/ProductLogs';
 import CashRegister from '@/pages/CashRegister';
+import ContentManagement from '@/pages/ContentManagement';
 
 
 
@@ -58,6 +59,7 @@ function App() {
               <Route path="/warehouse" element={<Waren />} />
               <Route path="/warehouse/logs" element={<ProductLogs />} />
               <Route path="/warehouse/cash-register" element={<CashRegister />} />
+              <Route path="/content" element={<ContentManagement />} />
               <Route path="/terminal" element={<Terminal />} />
               <Route path="/time-tracking" element={<Zeiterfassung />} />
               <Route path="/finance" element={<Finance />} />

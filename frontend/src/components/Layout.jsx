@@ -42,6 +42,7 @@ export default function Layout() {
         { name: 'Partner', path: '/subcontractors', icon: Building2, roles: ['Admin', 'Projektleiter', 'Büro'] },
         { name: 'Kategorien', path: '/categories', icon: FolderTree, roles: ['Admin', 'Projektleiter', 'Büro'] },
         { name: 'Benutzer', path: '/users', icon: Briefcase, roles: ['Admin'] },
+        { name: 'Inhalt', path: '/content', icon: LayoutDashboard, roles: ['Admin'] },
     ];
 
     const filteredNavItems = navItems.filter(item =>

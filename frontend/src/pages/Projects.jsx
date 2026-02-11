@@ -13,13 +13,18 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Eye, Trash2, Calendar } from "lucide-react";
+import { Plus, Search, Eye, Trash2, Calendar, Pencil } from "lucide-react";
+import ProjectModal from "@/components/ProjectModal";
 
 export default function Projects() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProject, setEditingProject] = useState(null);
 
     useEffect(() => {
         loadProjects();
@@ -47,6 +52,20 @@ export default function Projects() {
         }
     };
 
+    const handleCreateClick = () => {
+        setEditingProject(null);
+        setIsModalOpen(true);
+    };
+
+    const handleEditClick = (project) => {
+        setEditingProject(project);
+        setIsModalOpen(true);
+    };
+
+    const handleSave = (savedProject) => {
+        loadProjects(); // Reload to reflect changes
+    };
+
     const filteredProjects = projects.filter(project => {
         const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (project.projekt_nummer && project.projekt_nummer.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -69,12 +88,17 @@ export default function Projects() {
         <div className="container mx-auto p-6 space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-slate-900">Projekte</h1>
-                <Link to="/projects/new">
-                    <Button>
-                        <Plus className="w-4 h-4 mr-2" /> Neues Projekt
-                    </Button>
-                </Link>
+                <Button onClick={handleCreateClick}>
+                    <Plus className="w-4 h-4 mr-2" /> Neues Projekt
+                </Button>
             </div>
+
+            <ProjectModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                project={editingProject}
+                onSave={handleSave}
+            />
 
             <Card>
                 <CardHeader>
@@ -140,6 +164,9 @@ export default function Projects() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    <Button variant="ghost" size="sm" onClick={() => handleEditClick(project)}>
+                                                        <Pencil className="w-4 h-4 text-slate-500" />
+                                                    </Button>
                                                     <Link to={`/projects/${project.id}`}>
                                                         <Button variant="ghost" size="sm">
                                                             <Eye className="w-4 h-4 text-slate-500" />

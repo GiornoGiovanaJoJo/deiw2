@@ -32,6 +32,12 @@ export default function Footer() {
         setFormMessage({ text: '', type: '' });
 
         try {
+            if (activeTab === 'Отзыв') {
+                // Future: Submit to reviews endpoint
+                // For now, treat as inquiry with category 'Отзыв'
+                data.subject = `Review from Footer`;
+            }
+
             await publicApi.submitInquiry(data);
             setFormMessage({ text: 'Спасибо! Мы свяжемся с вами в течение 15 минут.', type: 'success' });
             e.target.reset();
@@ -67,7 +73,7 @@ export default function Footer() {
                         <div className="footer__form-box w-full lg:w-auto lg:min-w-[480px]" id="footer-form">
                             <h3 className="footer__form-title">Заполните форму, и мы свяжемся с вами в течение 15 минут</h3>
                             <div className="footer__form-tabs">
-                                {['Заявка', 'Каталог', 'Отзыв'].map((tab) => (
+                                {['Заявка', 'Отзыв'].map((tab) => (
                                     <button
                                         key={tab}
                                         type="button"

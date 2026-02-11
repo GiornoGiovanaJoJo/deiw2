@@ -14,11 +14,13 @@ import ProjectCard from "@/components/ProjectCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ServiceModal from "@/components/ServiceModal";
+import HeroCarousel from "@/components/HeroCarousel";
 
 export default function Home() {
     const [scrolled, setScrolled] = useState(false);
     const [currentService, setCurrentService] = useState(0);
     const [visibleServices, setVisibleServices] = useState(1);
+    const [heroContent, setHeroContent] = useState(null);
 
     // Modal State
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -37,7 +39,7 @@ export default function Home() {
     useEffect(() => {
         const loadPublicData = async () => {
             try {
-                const [cats, projs] = await Promise.all([
+                const [cats, projs, heroData] = await Promise.all([
                     publicApi.getCategories().catch(err => {
                         console.error("Error fetching categories:", err);
                         return [];
@@ -45,8 +47,13 @@ export default function Home() {
                     publicApi.getProjects().catch(err => {
                         console.error("Error fetching projects:", err);
                         return [];
-                    })
+                    }),
+                    publicApi.getContent('home_hero').catch(err => null)
                 ]);
+
+                if (heroData) {
+                    setHeroContent(heroData.content);
+                }
 
                 if (cats && cats.length > 0) {
                     setServices(cats);
@@ -169,10 +176,16 @@ export default function Home() {
                     <div className="container">
                         <div className="hero__content">
                             <h1 className="hero__title">
-                                <span className="hero__brand">Empire Premium</span> — <span className="hero__title-small">строим ваше будущее!</span>
+                                {heroContent?.logo ? (
+                                    <img src={heroContent.logo} alt="Empire Premium" className="h-16 mb-4" />
+                                ) : (
+                                    <span className="hero__brand">Empire Premium</span>
+                                )}
+                                {!heroContent?.logo && " — "}
+                                <span className="hero__title-small">{heroContent?.title || "строим ваше будущее!"}</span>
                             </h1>
                             <p className="hero__subtitle">
-                                Empire Premium — это строительная компания премиум-класса с командой экспертов, воплощающих в жизнь даже самые смелые идеи.
+                                {heroContent?.subtitle || "Empire Premium — это строительная компания премиум-класса с командой экспертов, воплощающих в жизнь даже самые смелые идеи."}
                             </p>
                             <div className="hero__buttons">
                                 <button onClick={() => scrollToSection('footer-form')} className="btn btn--primary">
@@ -195,12 +208,16 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="hero__visual">
-                            <div className="hero__visual-inner">
-                                <div className="hero__visual-placeholder">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop"
-                                        alt="Hero Building"
-                                    />
+                            <div className="hero__visual-inner" style={{ height: '130%' }}>
+                                <div className="hero__visual-placeholder h-full">
+                                    {heroContent?.images && heroContent.images.length > 0 ? (
+                                        <HeroCarousel images={heroContent.images} />
+                                    ) : (
+                                        <img
+                                            src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop"
+                                            alt="Hero Building"
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>

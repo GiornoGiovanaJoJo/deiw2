@@ -57,7 +57,7 @@ export default function Header() {
                         Empire <span>Premium</span>
                     </Link>
 
-                    <nav className="nav">
+                    <nav className="nav hidden lg:flex">
                         <button onClick={() => scrollToSection('about')} className="nav__link">О нас</button>
                         <button onClick={() => scrollToSection('services')} className="nav__link">Услуги</button>
                         <button onClick={() => scrollToSection('projects')} className="nav__link">Проекты</button>
@@ -79,8 +79,11 @@ export default function Header() {
                                 Войти
                             </Link>
                         )}
-                        <button onClick={() => scrollToSection('footer-form')} className="btn btn--outline-purple">
+                        <button onClick={() => scrollToSection('footer-form')} className="btn btn--outline-purple hidden sm:flex">
                             Оставить заявку <ArrowRight className="w-4 h-4 ml-2" />
+                        </button>
+                        <button onClick={() => scrollToSection('footer-form')} className="btn btn--outline-purple sm:hidden p-2">
+                            <ArrowRight className="w-4 h-4" />
                         </button>
                     </div>
 

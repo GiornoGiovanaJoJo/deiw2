@@ -18,6 +18,14 @@ export const publicApi = {
     submitInquiry: async (data) => {
         const response = await api.post('/tickets/public', data);
         return response.data;
+    },
+    getContent: async (key) => {
+        try {
+            const response = await api.get(`/content/${key}`);
+            return response.data;
+        } catch (error) {
+            return null;
+        }
     }
 };
 

@@ -10,6 +10,7 @@ import ProjectDocuments from "@/components/project/ProjectDocuments";
 import { format } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { Input } from "@/components/ui/input";
+import ProjectModal from "@/components/ProjectModal";
 
 export default function ProjectDetailsAdmin() {
     const { id } = useParams();
@@ -22,6 +23,7 @@ export default function ProjectDetailsAdmin() {
     // Chat States
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const messagesEndRef = React.useRef(null);
 
     useEffect(() => {

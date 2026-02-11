@@ -215,7 +215,11 @@ export const clientApi = {
     },
     createComment: async (data) => {
         return api.post('/comments/', data);
-    }
+    },
+    updateContent: (key, data) => api.put(`/content/${key}`, data),
+    uploadFile: (formData) => api.post('/upload/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
 };
 
 
