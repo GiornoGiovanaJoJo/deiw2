@@ -1,0 +1,61 @@
+{
+    "nav": {
+        "about": "About Us",
+        "services": "Services",
+        "projects": "Projects",
+        "career": "Career",
+        "profile": "Profile",
+        "logout": "Logout",
+        "login": "Login",
+        "request": "Submit Request",
+        "menu": "Menu"
+    },
+    "hero": {
+        "title_default": "building your future!",
+        "brand_default": "Empire Premium",
+        "subtitle_default": "Empire Premium is a premium construction company with a team of experts bringing even the boldest ideas to life.",
+        "years_exp": "Years of Experience",
+        "projects_done": "Projects Completed",
+        "warranty": "Years Warranty"
+    },
+    "features": {
+        "title_accent": "We support our clients at every stage:",
+        "title_base": "from concept to turnkey delivery",
+        "subtitle": "With us, you choose reliability, comfort, and style.",
+        "contact_us": "Contact Us",
+        "quality_title": "Impeccable Quality",
+        "quality_text": "We use only the best materials and advanced technologies.",
+        "innovative_title": "Innovative Solutions",
+        "innovative_text": "Our team is constantly looking for new approaches.",
+        "client_title": "Client-Oriented Approach",
+        "client_text": "We listen carefully to your needs."
+    },
+    "services": {
+        "title_default": "Our Services",
+        "empty": "Services coming soon"
+    },
+    "projects": {
+        "title": "Our Projects",
+        "empty": "Projects coming soon"
+    },
+    "cta": {
+        "title": "Do you have questions, suggestions or\nneed help with your project?",
+        "subtitle": "Contact us — we will answer within 15 minutes and discuss your task."
+    },
+    "admin": {
+        "dashboard": "Dashboard",
+        "projects": "Projects",
+        "tasks": "Tasks",
+        "support": "Support",
+        "customers": "Customers",
+        "warehouse": "Warehouse",
+        "terminal": "Terminal",
+        "times": "Times",
+        "finance": "Finance",
+        "partners": "Partners",
+        "categories": "Categories",
+        "users": "Users",
+        "content": "Content",
+        "logout": "Logout"
+    }
+}

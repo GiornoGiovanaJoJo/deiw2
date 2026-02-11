@@ -1,0 +1,61 @@
+{
+    "nav": {
+        "about": "О нас",
+        "services": "Услуги",
+        "projects": "Проекты",
+        "career": "Карьера",
+        "profile": "Профиль",
+        "logout": "Выйти",
+        "login": "Войти",
+        "request": "Оставить заявку",
+        "menu": "Меню"
+    },
+    "hero": {
+        "title_default": "строим ваше будущее!",
+        "brand_default": "Empire Premium",
+        "subtitle_default": "Empire Premium — это строительная компания премиум-класса с командой экспертов, воплощающих в жизнь даже самые смелые идеи.",
+        "years_exp": "Многолетний опыт",
+        "projects_done": "Реализовали проектов",
+        "warranty": "Гарантия в годах"
+    },
+    "features": {
+        "title_accent": "Мы поддерживаем наших клиентов на каждом этапе:",
+        "title_base": "от концепции до сдачи «под ключ»",
+        "subtitle": "С нами вы выбираете надежность, комфорт и стиль.",
+        "contact_us": "Связаться с нами",
+        "quality_title": "Безупречное Качество",
+        "quality_text": "Мы используем только лучшие материалы и передовые технологии.",
+        "innovative_title": "Инновационные Решения",
+        "innovative_text": "Наша команда постоянно ищет новые подходы.",
+        "client_title": "Клиентоориентированный Подход",
+        "client_text": "Мы внимательно слушаем ваши потребности."
+    },
+    "services": {
+        "title_default": "Наши услуги",
+        "empty": "Услуги скоро появятся"
+    },
+    "projects": {
+        "title": "Наши проекты",
+        "empty": "Проекты скоро появятся"
+    },
+    "cta": {
+        "title": "У вас есть вопросы, предложения или\nнужна помощь с вашим проектом?",
+        "subtitle": "Свяжитесь с нами — ответим в течение 15 минут и обсудим вашу задачу."
+    },
+    "admin": {
+        "dashboard": "Dashboard",
+        "projects": "Projekte",
+        "tasks": "Aufgaben",
+        "support": "Support",
+        "customers": "Kunden",
+        "warehouse": "Lager",
+        "terminal": "Terminal",
+        "times": "Zeiten",
+        "finance": "Finanzen",
+        "partners": "Partner",
+        "categories": "Kategorien",
+        "users": "Benutzer",
+        "content": "Inhalt",
+        "logout": "Abmelden"
+    }
+}

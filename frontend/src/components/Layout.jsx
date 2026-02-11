@@ -1,53 +1,9 @@
-import React from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import {
-    LayoutDashboard,
-    Users,
-    FolderTree,
-    Briefcase,
-    LogOut,
-    Menu,
-    X,
-    FolderKanban,
-    Package,
-    QrCode,
-    MessageSquare,
-    Clock,
-    DollarSign,
-    Building2
-} from "lucide-react";
+import LanguageSwitcher from './LanguageSwitcher';
 
-
-
-import { Button } from "@/components/ui/button";
+// ... imports
 
 export default function Layout() {
-    const { user, logout } = useAuth();
-    const location = useLocation();
-    const [sidebarOpen, setSidebarOpen] = React.useState(false);
-
-    const isActive = (path) => location.pathname === path;
-
-    const navItems = [
-        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro'] },
-        { name: 'Projekte', path: '/projects', icon: FolderKanban, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Worker'] },
-        { name: 'Aufgaben', path: '/tasks', icon: Briefcase, roles: ['Admin', 'Projektleiter', 'Gruppenleiter', 'Büro', 'Worker'] },
-        { name: 'Support', path: '/support', icon: MessageSquare, roles: ['Admin', 'Projektleiter', 'Büro'] },
-        { name: 'Kunden', path: '/customers', icon: Users, roles: ['Admin', 'Projektleiter', 'Büro'] },
-        { name: 'Lager', path: '/warehouse', icon: Package, roles: ['Admin', 'Projektleiter', 'Büro', 'Warehouse'] },
-        { name: 'Terminal', path: '/terminal', icon: QrCode, roles: ['Admin', 'Projektleiter', 'Büro', 'Warehouse', 'Worker'] },
-        { name: 'Zeiten', path: '/time-tracking', icon: Clock, roles: ['Admin', 'Projektleiter', 'Büro'] },
-        { name: 'Finanzen', path: '/finance', icon: DollarSign, roles: ['Admin', 'Büro'] },
-        { name: 'Partner', path: '/subcontractors', icon: Building2, roles: ['Admin', 'Projektleiter', 'Büro'] },
-        { name: 'Kategorien', path: '/categories', icon: FolderTree, roles: ['Admin', 'Projektleiter', 'Büro'] },
-        { name: 'Benutzer', path: '/users', icon: Briefcase, roles: ['Admin'] },
-        { name: 'Inhalt', path: '/content', icon: LayoutDashboard, roles: ['Admin'] },
-    ];
-
-    const filteredNavItems = navItems.filter(item =>
-        item.roles.includes(user?.role) || user?.is_superuser
-    );
+    // ...
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
@@ -83,6 +39,10 @@ export default function Layout() {
                 </nav>
 
                 <div className="absolute bottom-0 left-0 w-full p-4 border-t border-slate-800">
+                    <div className="mb-4">
+                        <LanguageSwitcher className="w-full text-slate-300 hover:text-white" showLabel={true} />
+                    </div>
+
                     <div className="flex items-center gap-3 mb-4 px-2">
                         <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
                             <span className="font-bold text-xs">{user?.first_name?.[0]}{user?.last_name?.[0]}</span>
