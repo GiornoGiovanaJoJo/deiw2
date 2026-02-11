@@ -152,7 +152,11 @@ export default function Projects() {
                                     filteredProjects.map((project) => (
                                         <TableRow key={project.id}>
                                             <TableCell className="font-medium">{project.projekt_nummer || "-"}</TableCell>
-                                            <TableCell>{project.name}</TableCell>
+                                            <TableCell>
+                                                <Link to={`/projects/${project.id}`} className="font-medium hover:underline text-blue-600">
+                                                    {project.name}
+                                                </Link>
+                                            </TableCell>
                                             <TableCell>{getStatusBadge(project.status)}</TableCell>
                                             <TableCell className="text-slate-600 text-sm">
                                                 <div className="flex items-center gap-1">

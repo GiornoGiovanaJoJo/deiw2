@@ -41,7 +41,7 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           <Route path="/" element={<Home />} />
-          <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/portfolio/:id" element={<ProjectDetails />} />
           <Route path="/my-projects/:id" element={<ProjectDetailsUser />} />
 
           <Route element={<ProtectedRoute />}>

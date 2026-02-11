@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export default function ProjectCard({ project }) {
     return (
-        <Link to={`/projects/${project.id}`} className="block h-full group">
+        <Link to={`/portfolio/${project.id}`} className="block h-full group">
             <article className="project-card h-full flex flex-col">
                 {/* Image */}
                 <div className="project-card__img relative overflow-hidden h-64">
