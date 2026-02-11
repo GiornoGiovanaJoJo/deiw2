@@ -10,8 +10,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Folder, Plus, Trash2 } from "lucide-react";
+import { Folder, Plus, Trash2, Pencil, Save, X } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -23,8 +24,14 @@ import {
 export default function Categories() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [newCategoryName, setNewCategoryName] = useState('');
+
+    // Form State
+    const [editingId, setEditingId] = useState(null);
+    const [name, setName] = useState('');
     const [parentCategory, setParentCategory] = useState('none');
+    const [label, setLabel] = useState('');
+    const [image, setImage] = useState('');
+    const [modalConfig, setModalConfig] = useState(''); // JSON string
 
     useEffect(() => {
         loadCategories();
@@ -41,22 +48,59 @@ export default function Categories() {
         }
     };
 
-    const handleCreate = async (e) => {
+    const resetForm = () => {
+        setEditingId(null);
+        setName('');
+        setParentCategory('none');
+        setLabel('');
+        setImage('');
+        setModalConfig('');
+    };
+
+    const handleEdit = (cat) => {
+        setEditingId(cat.id);
+        setName(cat.name);
+        setParentCategory(cat.parent_id ? cat.parent_id.toString() : 'none');
+        setLabel(cat.label || '');
+        setImage(cat.image_url || '');
+        setModalConfig(cat.modal_config ? JSON.stringify(cat.modal_config, null, 2) : '');
+    };
+
+    const handleSave = async (e) => {
         e.preventDefault();
-        if (!newCategoryName.trim()) return;
+        if (!name.trim()) return;
 
         try {
+            let parsedConfig = null;
+            if (modalConfig.trim()) {
+                try {
+                    parsedConfig = JSON.parse(modalConfig);
+                } catch (err) {
+                    alert("Modal Konfiguration ist kein gültiges JSON!");
+                    return;
+                }
+            }
+
             const payload = {
-                name: newCategoryName,
+                name: name,
                 type: 'Projekt',
-                parent_id: parentCategory === 'none' ? null : parseInt(parentCategory)
+                parent_id: parentCategory === 'none' ? null : parseInt(parentCategory),
+                label: label,
+                image_url: image,
+                modal_config: parsedConfig
             };
-            await clientApi.createCategory(payload);
-            setNewCategoryName('');
-            setParentCategory('none');
+
+            if (editingId) {
+                await clientApi.updateCategory(editingId, payload);
+            } else {
+                await clientApi.createCategory(payload);
+            }
+
+            resetForm();
             loadCategories();
         } catch (error) {
-            console.error("Failed to create category", error);
+            console.error("Failed to save category", error);
+            alert("Fehler beim Speichern der Kategorie");
         }
     };
 
@@ -80,39 +124,110 @@ export default function Categories() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="md:col-span-1 h-fit">
                     <CardHeader>
-                        <CardTitle>Neue Kategorie / Leistung</CardTitle>
+                        <CardTitle>{editingId ? 'Kategorie bearbeiten' : 'Neue Kategorie / Leistung'}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleCreate} className="space-y-4">
+                        <form onSubmit={handleSave} className="space-y-4">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Name</label>
                                 <Input
                                     placeholder="Name der Kategorie"
-                                    value={newCategoryName}
-                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Übergeordnete Kategorie (Optional)</label>
+                                <label className="text-sm font-medium">Zusatzbeschriftung (Label)</label>
+                                <Input
+                                    placeholder="z.B. 'Neu' или 'Beliebt'"
+                                    value={label}
+                                    onChange={(e) => setLabel(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Übergeordnete Kategorie</label>
                                 <Select value={parentCategory} onValueChange={setParentCategory}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Keine (Hauptkategorie)" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="none">Keine (Hauptkategorie)</SelectItem>
-                                        {parentCategories.map(cat => (
-                                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                                                {cat.name}
-                                            </SelectItem>
-                                        ))}
+                                        {parentCategories
+                                            .filter(c => c.id !== editingId) // Prevent self-parenting
+                                            .map(cat => (
+                                                <SelectItem key={cat.id} value={cat.id.toString()}>
+                                                    {cat.name}
+                                                </SelectItem>
+                                            ))}
                                     </SelectContent>
                                 </Select>
                             </div>
 
-                            <Button type="submit" className="w-full">
-                                <Plus className="w-4 h-4 mr-2" /> Hinzufügen
-                            </Button>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Bild</label>
+                                <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+                                        try {
+                                            const res = await clientApi.uploadImage(file);
+                                            setImage(res.data.url);
+                                        } catch (err) {
+                                            console.error("Upload failed", err);
+                                            alert("Fehler beim Hochladen des Bildes");
+                                        }
+                                    }}
+                                />
+                                {image && (
+                                    <div className="mt-2 relative h-32 bg-slate-100 rounded-md overflow-hidden border">
+                                        <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 scale-75"
+                                            onClick={() => setImage('')}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Modal Konfiguration (JSON)</label>
+                                <p className="text-xs text-slate-500">
+                                    Definiert Felder für das Anfrage-Modal.
+                                </p>
+                                <Textarea
+                                    rows={8}
+                                    className="font-mono text-xs"
+                                    placeholder={`{
+  "formTitle": "Individuelle Anfrage",
+  "fields": [
+    { "name": "area", "label": "Fläche (m²)", "type": "number", "required": true },
+    { "name": "type", "label": "Typ", "type": "select", "options": ["Haus", "Wohnung"] }
+  ]
+}`}
+                                    value={modalConfig}
+                                    onChange={(e) => setModalConfig(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex gap-2 pt-2">
+                                <Button type="submit" className="flex-1">
+                                    {editingId ? <Save className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                                    {editingId ? 'Speichern' : 'Hinzufügen'}
+                                </Button>
+                                {editingId && (
+                                    <Button type="button" variant="outline" onClick={resetForm}>
+                                        <X className="w-4 h-4" />
+                                    </Button>
+                                )}
+                            </div>
                         </form>
                     </CardContent>
                 </Card>
@@ -150,9 +265,14 @@ export default function Categories() {
                                                 {parent ? parent.name : '-'}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <Button variant="ghost" size="sm" onClick={() => handleDelete(cat.id)}>
-                                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                                </Button>
+                                                <div className="flex justify-end gap-1">
+                                                    <Button variant="ghost" size="sm" onClick={() => handleEdit(cat)}>
+                                                        <Pencil className="w-4 h-4 text-slate-500" />
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(cat.id)}>
+                                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     );

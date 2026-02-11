@@ -14,7 +14,9 @@ class ProjectBase(BaseModel):
     projekt_nummer: Optional[str] = None
     budget: Optional[float] = 0.0
     address: Optional[str] = None
+    main_image: Optional[str] = None
     photos: Optional[List[str]] = []
+    files: Optional[List[dict]] = [] # List of {name, url}
     
     customer_id: Optional[int] = None
     category_id: Optional[int] = None

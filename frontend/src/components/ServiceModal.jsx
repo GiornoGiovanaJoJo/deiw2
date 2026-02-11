@@ -62,17 +62,36 @@ export default function ServiceModal({ isOpen, onClose, category }) {
         }
     }, [isOpen, category, user]);
 
-    // Mock sub-services if category doesn't have children (for demo/fallback)
+    // Parse Modal Config
+    const config = useMemo(() => {
+        if (!category?.modal_config) return null;
+        try {
+            return typeof category.modal_config === 'string'
+                ? JSON.parse(category.modal_config)
+                : category.modal_config;
+        } catch (e) {
+            console.error("Invalid modal config", e);
+            return null;
+        }
+    }, [category]);
+
+    // Mock sub-services or use Config/Children
     const subServices = useMemo(() => {
         if (!category) return [];
+
+        // Priority 1: Config subServices
+        if (config?.subServices) return config.subServices;
+
+        // Priority 2: Backend Children
         if (category.children && category.children.length > 0) return category.children;
-        // Fallback for demo if no children structure yet
+
+        // Priority 3: Fallback
         return [
             { id: '1', name: `Консультация: ${category.name}` },
             { id: '2', name: `Расчет стоимости: ${category.name}` },
             { id: '3', name: `Выезд специалиста` },
         ];
-    }, [category]);
+    }, [category, config]);
 
     const handleNext = () => {
         if (step === STEPS.SERVICE && selectedSubService) {
@@ -91,9 +110,27 @@ export default function ServiceModal({ isOpen, onClose, category }) {
         e.preventDefault();
         setLoading(true);
         try {
+            // Format dynamic fields into message
+            let fullMessage = formData.message || '';
+
+            if (config?.fields) {
+                const dynamicDetails = config.fields
+                    .filter(f => !['name', 'email', 'phone', 'message', 'city'].includes(f.name))
+                    .map(f => `${f.label}: ${formData[f.name] || '-'}`)
+                    .join('\n');
+
+                if (dynamicDetails) {
+                    fullMessage += `\n\n--- Детали заказа ---\n${dynamicDetails}`;
+                }
+            }
+
+            if (formData.city) {
+                fullMessage += `\nГород: ${formData.city}`;
+            }
+
             const ticketData = {
                 subject: `Заявка на услугу: ${category.name} - ${selectedSubService.name}`,
-                message: formData.message,
+                message: fullMessage,
                 sender_name: formData.name,
                 sender_email: formData.email,
                 sender_phone: formData.phone,
@@ -266,65 +303,104 @@ export default function ServiceModal({ isOpen, onClose, category }) {
                         {/* Step 2: Form */}
                         {step === STEPS.FORM && (
                             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                                <h3 className="text-2xl font-bold text-slate-900 mb-2">Заполните форму</h3>
-                                <p className="text-slate-500 mb-6">Оставьте заявку, и мы ответим на все интересующие вопросы</p>
+                                <h3 className="text-2xl font-bold text-slate-900 mb-2">{config?.formTitle || "Заполните форму"}</h3>
+                                <p className="text-slate-500 mb-6">{config?.formSubtitle || "Оставьте заявку, и мы ответим на все интересующие вопросы"}</p>
 
                                 <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Полное имя</Label>
-                                        <Input
-                                            id="name"
-                                            placeholder="Иван Иванов"
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            required
-                                            className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone">Номер телефона</Label>
-                                        <Input
-                                            id="phone"
-                                            placeholder="+7 (999) 000-00-00"
-                                            value={formData.phone}
-                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                            required
-                                            className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Адрес эл. почты</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            placeholder="ivan@example.com"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="city">Город</Label>
-                                            <Input
-                                                id="city"
-                                                placeholder="Москва"
-                                                value={formData.city}
-                                                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                                                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
-                                            />
+                                    {/* Dynamic Fields from Config */}
+                                    {config?.fields && config.fields.map((field, idx) => (
+                                        <div key={idx} className="space-y-2">
+                                            <Label htmlFor={`field-${idx}`}>{field.label}</Label>
+                                            {field.type === 'textarea' ? (
+                                                <Textarea
+                                                    id={`field-${idx}`}
+                                                    placeholder={field.placeholder || ''}
+                                                    value={formData[field.name] || ''}
+                                                    onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                                                    required={field.required}
+                                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors min-h-[80px]"
+                                                />
+                                            ) : field.type === 'select' ? (
+                                                <select
+                                                    id={`field-${idx}`}
+                                                    value={formData[field.name] || ''}
+                                                    onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                                                    required={field.required}
+                                                    className="w-full rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                >
+                                                    <option value="" disabled>{field.placeholder || "Выберите..."}</option>
+                                                    {field.options?.map((opt, optIdx) => (
+                                                        <option key={optIdx} value={opt}>{opt}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <Input
+                                                    id={`field-${idx}`}
+                                                    type={field.type || 'text'}
+                                                    placeholder={field.placeholder || ''}
+                                                    value={formData[field.name] || ''}
+                                                    onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+                                                    required={field.required}
+                                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                                                />
+                                            )}
                                         </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="message">Комментарий</Label>
-                                        <Textarea
-                                            id="message"
-                                            placeholder="Опишите задачу подробнее..."
-                                            value={formData.message}
-                                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                            className="bg-slate-50 border-slate-200 focus:bg-white transition-colors min-h-[100px]"
-                                        />
-                                    </div>
+                                    ))}
+
+                                    {/* Default Fields (if no config or to append) */}
+                                    {!config?.fields && (
+                                        <>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="name">Полное имя</Label>
+                                                <Input
+                                                    id="name"
+                                                    placeholder="Иван Иванов"
+                                                    value={formData.name}
+                                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                    required
+                                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="phone">Номер телефона</Label>
+                                                <Input
+                                                    id="phone"
+                                                    placeholder="+7 (999) 000-00-00"
+                                                    value={formData.phone}
+                                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                    required
+                                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="email">Адрес эл. почты</Label>
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    placeholder="ivan@example.com"
+                                                    value={formData.email}
+                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="message">Комментарий</Label>
+                                                <Textarea
+                                                    id="message"
+                                                    placeholder="Опишите задачу подробнее..."
+                                                    value={formData.message}
+                                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                                    className="bg-slate-50 border-slate-200 focus:bg-white transition-colors min-h-[100px]"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Always show Contact Info if using dynamic fields to ensure we get contact details? 
+                                        Actually, dynamic fields should probably include contact details or we append them.
+                                        For now, let's assume if 'fields' is defined, it REPLACES the default form. 
+                                        So the admin must include name/phone fields in their config if they want them.
+                                    */}
                                 </form>
                             </div>
                         )}
@@ -373,7 +449,9 @@ export default function ServiceModal({ isOpen, onClose, category }) {
                             ) : (
                                 <Button
                                     onClick={handleSubmit}
-                                    disabled={loading || !formData.name || !formData.phone}
+                                    disabled={loading || (config?.fields
+                                        ? config.fields.some(f => f.required && !formData[f.name])
+                                        : (!formData.name || !formData.phone))}
                                     className="gap-2 min-w-[140px]"
                                 >
                                     {loading ? (

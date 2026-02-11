@@ -53,7 +53,9 @@ class Projekt(Base):
     end_date = Column(Date, nullable=True)
     budget = Column(Float, default=0.0)
     address = Column(String, nullable=True)
-    photos = Column(JSON, default=list) # List of image URLs
+    main_image = Column(String, nullable=True) # Main featured image
+    photos = Column(JSON, default=list) # List of additional image URLs (Gallery)
+    files = Column(JSON, default=list) # List of file objects {name, url, type}
     
     # Foreign Keys
     customer_id = Column(Integer, ForeignKey("customer.id"), nullable=True)

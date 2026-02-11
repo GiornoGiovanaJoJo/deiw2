@@ -17,6 +17,10 @@ class Category(Base):
     icon_name = Column(String, nullable=True)
     image_url = Column(String, nullable=True)
     
+    # New fields
+    label = Column(String, nullable=True) # Zusatzbeschriftung
+    modal_config = Column(JSON, nullable=True) # Configuration for the service modal
+
     # Dynamic fields definition
     custom_fields = Column(JSON, nullable=True)
 

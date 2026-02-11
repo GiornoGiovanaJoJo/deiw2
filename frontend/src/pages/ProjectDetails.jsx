@@ -119,9 +119,9 @@ export default function ProjectDetails() {
             <main className="flex-1">
                 {/* Hero Section */}
                 <div className="relative h-[60vh] bg-slate-900">
-                    {(project.photos && project.photos.length > 0) || project.foto ? (
+                    {project.main_image || (project.photos && project.photos.length > 0) || project.foto ? (
                         <img
-                            src={(project.photos && project.photos.length > 0) ? project.photos[0] : project.foto}
+                            src={project.main_image || (project.photos && project.photos.length > 0 ? project.photos[0] : project.foto)}
                             alt={project.name}
                             className="w-full h-full object-cover opacity-60"
                         />
@@ -193,6 +193,24 @@ export default function ProjectDetails() {
                                             {project.description || "Keine Beschreibung verfügbar."}
                                         </p>
                                     </div>
+
+                                    {/* Gallery */}
+                                    {project.photos && project.photos.length > 0 && (
+                                        <div>
+                                            <h2 className="text-2xl font-bold mb-4">Galerie</h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {project.photos.map((photo, index) => (
+                                                    <div key={index} className="rounded-xl overflow-hidden h-64 border border-slate-100 shadow-sm">
+                                                        <img
+                                                            src={photo}
+                                                            alt={`Projektbild ${index + 1}`}
+                                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Sidebar Info */}
@@ -237,7 +255,32 @@ export default function ProjectDetails() {
                 )}
 
                 {activeTab === 'docs' && (
-                    <div className="container pb-16">
+                    <div className="container pb-16 space-y-8">
+                        {/* Static Files from Project */}
+                        {project.files && project.files.length > 0 && (
+                            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                <h3 className="text-lg font-bold mb-4">Projektdateien</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {project.files.map((file, index) => (
+                                        <a
+                                            key={index}
+                                            href={file.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center p-4 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-colors group"
+                                        >
+                                            <div className="bg-blue-100 p-2 rounded-md mr-3 group-hover:bg-blue-200">
+                                                <Tag className="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div className="overflow-hidden">
+                                                <p className="font-medium text-slate-900 truncate">{file.name}</p>
+                                                <p className="text-xs text-slate-500 uppercase">{file.type?.split('/')[1] || 'FILE'}</p>
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         <ProjectDocuments projectId={id} />
                     </div>
                 )}

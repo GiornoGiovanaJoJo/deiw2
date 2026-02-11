@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { Link } from 'react-router-dom';
 
 export default function ProjectNew() {
@@ -30,7 +30,10 @@ export default function ProjectNew() {
         address: '',
         customer_id: '',
         category_id: '',
-        projektleiter_id: ''
+        projektleiter_id: '',
+        main_image: '',
+        photos: [], // Gallery
+        files: []   // Documents
     });
 
     useEffect(() => {
@@ -68,7 +71,10 @@ export default function ProjectNew() {
                     address: project.address || '',
                     customer_id: project.customer_id || '',
                     category_id: project.category_id || '',
-                    projektleiter_id: project.projektleiter_id || ''
+                    projektleiter_id: project.projektleiter_id || '',
+                    main_image: project.main_image || '',
+                    photos: project.photos || [],
+                    files: project.files || []
                 });
             } catch (error) {
                 console.error("Failed to load project", error);
@@ -93,6 +99,9 @@ export default function ProjectNew() {
                 customer_id: form.customer_id ? parseInt(form.customer_id) : null,
                 category_id: form.category_id ? parseInt(form.category_id) : null,
                 projektleiter_id: form.projektleiter_id ? parseInt(form.projektleiter_id) : null,
+                main_image: form.main_image,
+                photos: form.photos,
+                files: form.files
             };
 
             if (isEditMode) {
@@ -269,45 +278,150 @@ export default function ProjectNew() {
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="image">Projektbild</Label>
-                            <Input
-                                id="image"
-                                type="file"
-                                accept="image/*"
-                                onChange={async (e) => {
-                                    const file = e.target.files[0];
-                                    if (!file) return;
+                        <div className="space-y-4 border-t pt-4">
+                            <h3 className="text-lg font-medium">Medien & Dateien</h3>
 
-                                    try {
-                                        setLoading(true);
-                                        const res = await clientApi.uploadImage(file);
-                                        // backend returns { url: "..." }
-                                        // We store it in photos array as backend expects list of strings
-                                        setForm(prev => ({
-                                            ...prev,
-                                            photos: [res.data.url]
-                                        }));
-                                    } catch (err) {
-                                        console.error("Upload failed", err);
-                                        alert("Fehler beim Hochladen des Bildes");
-                                    } finally {
-                                        setLoading(false);
-                                    }
-                                }}
-                            />
-                            {form.photos && form.photos.length > 0 && (
-                                <div className="mt-2 relative w-full h-48 bg-slate-100 rounded-md overflow-hidden">
-                                    <img src={form.photos[0]} alt="Preview" className="w-full h-full object-cover" />
-                                    <button
-                                        type="button"
-                                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                                        onClick={() => setForm(prev => ({ ...prev, photos: [] }))}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                                    </button>
+                            {/* Main Image */}
+                            <div className="space-y-2">
+                                <Label htmlFor="main_image">Hauptbild (Cover)</Label>
+                                <Input
+                                    id="main_image"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+                                        try {
+                                            setLoading(true);
+                                            const res = await clientApi.uploadImage(file);
+                                            setForm(prev => ({ ...prev, main_image: res.data.url }));
+                                        } catch (err) {
+                                            console.error("Upload failed", err);
+                                            alert("Fehler beim Hochladen des Hauptbildes");
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }}
+                                />
+                                {form.main_image && (
+                                    <div className="mt-2 relative w-full md:w-1/2 h-48 bg-slate-100 rounded-md overflow-hidden border">
+                                        <img src={form.main_image} alt="Main Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                                            onClick={() => setForm(prev => ({ ...prev, main_image: '' }))}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Gallery */}
+                            <div className="space-y-2">
+                                <Label htmlFor="gallery">Galerie (Zusätzliche Bilder)</Label>
+                                <Input
+                                    id="gallery"
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={async (e) => {
+                                        const files = Array.from(e.target.files);
+                                        if (files.length === 0) return;
+
+                                        try {
+                                            setLoading(true);
+                                            const uploadPromises = files.map(file => clientApi.uploadImage(file));
+                                            const responses = await Promise.all(uploadPromises);
+                                            const newUrls = responses.map(res => res.data.url);
+
+                                            setForm(prev => ({
+                                                ...prev,
+                                                photos: [...(prev.photos || []), ...newUrls]
+                                            }));
+                                        } catch (err) {
+                                            console.error("Gallery upload failed", err);
+                                            alert("Fehler beim Hochladen der Galeriebilder");
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }}
+                                />
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                                    {(form.photos || []).map((url, index) => (
+                                        <div key={index} className="relative h-32 bg-slate-100 rounded-md overflow-hidden border">
+                                            <img src={url} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+                                            <button
+                                                type="button"
+                                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 scale-75"
+                                                onClick={() => setForm(prev => ({
+                                                    ...prev,
+                                                    photos: prev.photos.filter((_, i) => i !== index)
+                                                }))}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
+                            </div>
+
+                            {/* Files */}
+                            <div className="space-y-2">
+                                <Label htmlFor="files">Dokumente (PDF, DOCX, etc.)</Label>
+                                <Input
+                                    id="files"
+                                    type="file"
+                                    multiple
+                                    onChange={async (e) => {
+                                        const files = Array.from(e.target.files);
+                                        if (files.length === 0) return;
+
+                                        try {
+                                            setLoading(true);
+                                            // Assuming uploadImage handles generic files too, or we need a specific endpoint. 
+                                            // Implementation plan said verified generic upload.
+                                            const uploadPromises = files.map(file => clientApi.uploadImage(file));
+                                            const responses = await Promise.all(uploadPromises);
+
+                                            const newFiles = responses.map((res, idx) => ({
+                                                name: files[idx].name,
+                                                url: res.data.url,
+                                                type: files[idx].type
+                                            }));
+
+                                            setForm(prev => ({
+                                                ...prev,
+                                                files: [...(prev.files || []), ...newFiles]
+                                            }));
+                                        } catch (err) {
+                                            console.error("File upload failed", err);
+                                            alert("Fehler beim Hochladen der Dateien");
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }}
+                                />
+                                <div className="space-y-2 mt-2">
+                                    {(form.files || []).map((file, index) => (
+                                        <div key={index} className="flex items-center justify-between p-2 bg-slate-50 border rounded-md">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <span className="text-sm font-medium truncate">{file.name}</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="text-red-500 hover:text-red-700"
+                                                onClick={() => setForm(prev => ({
+                                                    ...prev,
+                                                    files: prev.files.filter((_, i) => i !== index)
+                                                }))}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4">

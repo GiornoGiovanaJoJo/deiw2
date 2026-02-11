@@ -9,6 +9,8 @@ class CategoryBase(BaseModel):
     color: Optional[str] = None
     icon_name: Optional[str] = None
     image_url: Optional[str] = None
+    label: Optional[str] = None
+    modal_config: Optional[Dict[str, Any]] = None
     custom_fields: Optional[Dict[str, Any]] = None
 
 class CategoryCreate(CategoryBase):
