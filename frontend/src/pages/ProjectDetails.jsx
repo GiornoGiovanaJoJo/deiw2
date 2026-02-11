@@ -18,9 +18,59 @@ export default function ProjectDetails() {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('details');
 
+    // Mock Data for Demo
+    const MOCK_PROJECTS = {
+        'p1': {
+            id: 'p1',
+            name: 'Современный лофт',
+            description: 'Полная реновация квартиры в индустриальном стиле. Использованы натуральные материалы, открытая проводка и кирпичная кладка.',
+            status: 'Завершен',
+            adresse: 'Москва, Центр',
+            start_date: '2023-05-01',
+            end_date: '2023-08-15',
+            photos: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2653&auto=format&fit=crop']
+        },
+        'p2': {
+            id: 'p2',
+            name: 'Загородный дом',
+            description: 'Строительство двухэтажного коттеджа из газобетона с панорамным остеклением и террасой.',
+            status: 'В процессе',
+            adresse: 'Подмосковье',
+            start_date: '2023-09-01',
+            photos: ['https://images.unsplash.com/photo-1600596542815-e32c21574211?q=80&w=2675&auto=format&fit=crop']
+        },
+        'p3': {
+            id: 'p3',
+            name: 'Офис IT',
+            description: 'Современное офисное пространство open-space с зонами отдыха и переговорными.',
+            status: 'Завершен',
+            adresse: 'Москва, Сити',
+            start_date: '2023-02-10',
+            end_date: '2023-04-20',
+            photos: ['https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop']
+        },
+        'p4': {
+            id: 'p4',
+            name: 'Студия',
+            description: 'Эргономичный дизайн для небольшой студии 25 кв.м.',
+            status: 'Завершен',
+            adresse: 'Санкт-Петербург',
+            start_date: '2023-11-05',
+            end_date: '2023-12-25',
+            photos: ['https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=2670&auto=format&fit=crop']
+        }
+    };
+
     useEffect(() => {
         const loadProject = async () => {
             try {
+                // Check if ID is a mock ID
+                if (MOCK_PROJECTS[id]) {
+                    setProject(MOCK_PROJECTS[id]);
+                    setLoading(false);
+                    return;
+                }
+
                 const data = await publicApi.getProjectById(id);
                 setProject(data);
             } catch (err) {

@@ -107,10 +107,10 @@ export default function Home() {
                 } else {
                     // Default Projects if API returns empty
                     setProjects([
-                        { id: 'p1', name: 'Современный лофт', description: 'Ремонт квартиры в стиле лофт', status: 'Завершен', address: 'Москва, Центр' },
-                        { id: 'p2', name: 'Загородный дом', description: 'Строительство коттеджа под ключ', status: 'В процессе', address: 'Подмосковье' },
-                        { id: 'p3', name: 'Офис IT', description: 'Отделка офисного помещения', status: 'Завершен', address: 'Москва, Сити' },
-                        { id: 'p4', name: 'Студия', description: 'Дизайнерский ремонт студии', status: 'Завершен', address: 'Санкт-Петербург' },
+                        { id: 'p1', name: 'Современный лофт', description: 'Ремонт квартиры в стиле лофт', status: 'Завершен', adresse: 'Москва, Центр', photos: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2653&auto=format&fit=crop'] },
+                        { id: 'p2', name: 'Загородный дом', description: 'Строительство коттеджа под ключ', status: 'В процессе', adresse: 'Подмосковье', photos: ['https://images.unsplash.com/photo-1600596542815-e32c21574211?q=80&w=2675&auto=format&fit=crop'] },
+                        { id: 'p3', name: 'Офис IT', description: 'Отделка офисного помещения', status: 'Завершен', adresse: 'Москва, Сити', photos: ['https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop'] },
+                        { id: 'p4', name: 'Студия', description: 'Дизайнерский ремонт студии', status: 'Завершен', adresse: 'Санкт-Петербург', photos: ['https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=2670&auto=format&fit=crop'] },
                     ]);
                 }
 
