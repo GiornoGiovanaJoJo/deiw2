@@ -47,6 +47,19 @@ class Project(ProjectInDBBase):
 
 class ProjectPublic(ProjectBase):
     id: int
-    # Simplified public view
+    # Simplified public view - Exclude sensitive fields
+    customer_id: Optional[int] = None # Exclude
+    projektleiter_id: Optional[int] = None # Exclude
+    budget: Optional[float] = None # Exclude
+    projekt_nummer: Optional[str] = None # Exclude
+    files: Optional[List[dict]] = [] # Exclude
+
     class Config:
         from_attributes = True
+        fields = {
+            'customer_id': {'exclude': True},
+            'projektleiter_id': {'exclude': True},
+            'budget': {'exclude': True},
+            'projekt_nummer': {'exclude': True},
+            'files': {'exclude': True}
+        }

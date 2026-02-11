@@ -100,7 +100,7 @@ def read_public_projects(
     """
     Retrieve public projects.
     """
-    projects = db.query(Projekt).offset(skip).limit(limit).all()
+    projects = db.query(Projekt).filter(Projekt.status == "Abgeschlossen").offset(skip).limit(limit).all()
     return projects
 
 @router.post("/", response_model=Project)
@@ -242,7 +242,7 @@ def read_public_project(
     """
     Get public project by ID.
     """
-    project = db.query(Projekt).filter(Projekt.id == project_id).first()
+    project = db.query(Projekt).filter(Projekt.id == project_id, Projekt.status == "Abgeschlossen").first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project

@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Calendar, MapPin, Send, MessageSquare } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Send, MessageSquare, Layers, FileText } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { format } from 'date-fns';
+import ProjectStages from "@/components/project/ProjectStages";
+import ProjectDocuments from "@/components/project/ProjectDocuments";
 
 export default function ProjectDetailsUser() {
     const { id } = useParams();
@@ -49,9 +51,6 @@ export default function ProjectDetailsUser() {
 
     const loadMessages = async () => {
         try {
-            // Fetch messages for this project
-            // We need to update clientApi to support project_id filter or manually filter if backend supports it
-            // Assuming we updated backend to accept project_id query param
             const response = await clientApi.getMessages(id);
             setMessages(response.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
             scrollToBottom();
@@ -65,10 +64,6 @@ export default function ProjectDetailsUser() {
         if (!newMessage.trim()) return;
 
         try {
-            // Recipient? 
-            // In a project context, user messages the Project Leader or Admin.
-            // If project has a leader, message them. If not, maybe admin (ID 1).
-            // Let's try to use project.projektleiter_id if available, else 1.
             const recipientId = project.projektleiter_id || 1;
 
             const res = await clientApi.sendMessage({
@@ -114,16 +109,28 @@ export default function ProjectDetailsUser() {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex gap-4 border-b border-slate-200 mb-6">
+                <div className="flex gap-4 border-b border-slate-200 mb-6 overflow-x-auto">
                     <button
                         onClick={() => setActiveTab('overview')}
-                        className={`py-2 px-4 font-medium transition-colors border-b-2 ${activeTab === 'overview' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                        className={`py-2 px-4 font-medium transition-colors border-b-2 whitespace-nowrap ${activeTab === 'overview' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                     >
                         Übersicht
                     </button>
                     <button
+                        onClick={() => setActiveTab('stages')}
+                        className={`py-2 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'stages' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                    >
+                        <Layers className="w-4 h-4" /> Phasen
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('documents')}
+                        className={`py-2 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'documents' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                    >
+                        <FileText className="w-4 h-4" /> Dokumente
+                    </button>
+                    <button
                         onClick={() => setActiveTab('chat')}
-                        className={`py-2 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${activeTab === 'chat' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                        className={`py-2 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${activeTab === 'chat' ? 'border-[#7C3AED] text-[#7C3AED]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                     >
                         <MessageSquare className="w-4 h-4" /> Chat zum Auftrag
                     </button>
@@ -166,6 +173,14 @@ export default function ProjectDetailsUser() {
                                 </Card>
                             </div>
                         </div>
+                    )}
+
+                    {activeTab === 'stages' && (
+                        <ProjectStages projectId={id} readOnly={true} />
+                    )}
+
+                    {activeTab === 'documents' && (
+                        <ProjectDocuments projectId={id} />
                     )}
 
                     {activeTab === 'chat' && (

@@ -21,7 +21,7 @@ import {
 import { Plus, Pencil, Trash2, CheckCircle2, Circle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
-export default function ProjectStages({ projectId }) {
+export default function ProjectStages({ projectId, readOnly = false }) {
     const [stages, setStages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -116,10 +116,12 @@ export default function ProjectStages({ projectId }) {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Projektphasen</h3>
-                <Button onClick={openNewDialog} size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Phase hinzufügen
-                </Button>
+                {!readOnly && (
+                    <Button onClick={openNewDialog} size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Phase hinzufügen
+                    </Button>
+                )}
             </div>
 
             <div className="space-y-4">
@@ -153,14 +155,16 @@ export default function ProjectStages({ projectId }) {
                                         {stage.end_date && <span>Ende: {stage.end_date}</span>}
                                     </div>
                                 </div>
-                                <div className="flex gap-1">
-                                    <Button variant="ghost" size="icon" onClick={() => openEditDialog(stage)}>
-                                        <Pencil className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(stage.id)}>
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </div>
+                                {!readOnly && (
+                                    <div className="flex gap-1">
+                                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(stage)}>
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(stage.id)}>
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </Card>
                     ))
