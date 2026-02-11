@@ -28,7 +28,7 @@ export default function ProjectDetails() {
             adresse: 'Москва, Центр',
             start_date: '2023-05-01',
             end_date: '2023-08-15',
-            photos: ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2653&auto=format&fit=crop']
+            photos: [] // No external photos to avoid loading errors
         },
         'p2': {
             id: 'p2',
@@ -37,7 +37,7 @@ export default function ProjectDetails() {
             status: 'В процессе',
             adresse: 'Подмосковье',
             start_date: '2023-09-01',
-            photos: ['https://images.unsplash.com/photo-1600596542815-e32c21574211?q=80&w=2675&auto=format&fit=crop']
+            photos: []
         },
         'p3': {
             id: 'p3',
@@ -47,7 +47,7 @@ export default function ProjectDetails() {
             adresse: 'Москва, Сити',
             start_date: '2023-02-10',
             end_date: '2023-04-20',
-            photos: ['https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop']
+            photos: []
         },
         'p4': {
             id: 'p4',
@@ -57,7 +57,7 @@ export default function ProjectDetails() {
             adresse: 'Санкт-Петербург',
             start_date: '2023-11-05',
             end_date: '2023-12-25',
-            photos: ['https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=2670&auto=format&fit=crop']
+            photos: []
         }
     };
 

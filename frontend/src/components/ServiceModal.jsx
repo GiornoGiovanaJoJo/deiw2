@@ -135,6 +135,7 @@ export default function ServiceModal({ isOpen, onClose, category }) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-50 gap-0 h-[600px] flex">
+                <DialogTitle className="sr-only">Бронирование услуги: {category.name}</DialogTitle>
 
                 {/* Visual Side (Left) - Hidden on mobile if needed, but keeping for design */}
                 <div className="hidden md:flex w-1/3 bg-slate-900 text-white flex-col p-8 justify-between relative overflow-hidden">
