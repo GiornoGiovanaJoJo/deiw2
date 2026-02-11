@@ -1,8 +1,15 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, ArrowRight } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 import { publicApi } from "@/api/public";
-
-// ... imports
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
+import '../pages/Home.css'; // Ensure styles are available
 
 export default function Header() {
+    const { t } = useTranslation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoUrl, setLogoUrl] = useState(null);
@@ -34,7 +41,32 @@ export default function Header() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // ... scroll utils
+    const scrollToSection = (id) => {
+        if (location.pathname !== '/') {
+            // If not on home page, navigate to home then scroll (via hash)
+            navigate(`/#${id}`);
+            return;
+        }
+
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+            setMobileMenuOpen(false);
+        }
+    };
+
+    // Handle hash navigation if arriving from another page
+    useEffect(() => {
+        if (location.pathname === '/' && location.hash) {
+            const id = location.hash.replace('#', '');
+            const element = document.getElementById(id);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+        }
+    }, [location]);
 
     return (
         <>
@@ -51,11 +83,11 @@ export default function Header() {
                         )}
                     </Link>
 
-                    <nav className="nav hidden lg:flex">
-                        <button onClick={() => scrollToSection('about')} className="nav__link">О нас</button>
-                        <button onClick={() => scrollToSection('services')} className="nav__link">Услуги</button>
-                        <button onClick={() => scrollToSection('projects')} className="nav__link">Проекты</button>
-                        <button onClick={() => scrollToSection('contact')} className="nav__link">Карьера</button>
+                    <nav className="nav hidden lg:flex items-center gap-6">
+                        <button onClick={() => scrollToSection('about')} className="nav__link">{t('nav.about')}</button>
+                        <button onClick={() => scrollToSection('services')} className="nav__link">{t('nav.services')}</button>
+                        <button onClick={() => scrollToSection('projects')} className="nav__link">{t('nav.projects')}</button>
+                        <LanguageSwitcher />
                     </nav>
 
                     <div className="header__cta">
@@ -106,7 +138,9 @@ export default function Header() {
                     </div>
 
                     <nav className="flex-1 overflow-y-auto py-6 px-6 flex flex-col gap-2">
-                        <LanguageSwitcher className="w-full mb-4 justify-start" />
+                        <div className="mb-4">
+                            <LanguageSwitcher className="w-full justify-start" />
+                        </div>
                         <button onClick={() => scrollToSection('about')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">{t('nav.about')}</button>
                         <button onClick={() => scrollToSection('services')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">{t('nav.services')}</button>
                         <button onClick={() => scrollToSection('projects')} className="text-left py-3 px-4 rounded-lg hover:bg-slate-50 font-medium text-slate-900">{t('nav.projects')}</button>
@@ -144,7 +178,6 @@ export default function Header() {
                         >
                             {t('nav.request')} <ArrowRight className="w-4 h-4" />
                         </button>
-
                     </div>
                 </div>
             </div>

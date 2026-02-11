@@ -1,0 +1,61 @@
+{
+    "nav": {
+        "about": "Über uns",
+        "services": "Dienstleistungen",
+        "projects": "Projekte",
+        "career": "Karriere",
+        "profile": "Profil",
+        "logout": "Abmelden",
+        "login": "Anmelden",
+        "request": "Anfrage senden",
+        "menu": "Menü"
+    },
+    "hero": {
+        "title_default": "wir bauen ihre zukunft!",
+        "brand_default": "Empire Premium",
+        "subtitle_default": "Empire Premium ist ein Bauunternehmen der Premiumklasse mit einem Expertenteam, das selbst die kühnsten Ideen verwirklicht.",
+        "years_exp": "Jahre Erfahrung",
+        "projects_done": "Projekte realisiert",
+        "warranty": "Jahre Garantie"
+    },
+    "features": {
+        "title_accent": "Wir unterstützen unsere Kunden in jeder Phase:",
+        "title_base": "vom Konzept bis zur schlüsselfertigen Übergabe",
+        "subtitle": "Mit uns wählen Sie Zuverlässigkeit, Komfort und Stil.",
+        "contact_us": "Kontaktieren Sie uns",
+        "quality_title": "Tadellose Qualität",
+        "quality_text": "Wir verwenden nur die besten Materialien und fortschrittliche Technologien.",
+        "innovative_title": "Innovative Lösungen",
+        "innovative_text": "Unser Team sucht ständig nach neuen Ansätzen.",
+        "client_title": "Kundenorientierter Ansatz",
+        "client_text": "Wir hören aufmerksam auf Ihre Bedürfnisse."
+    },
+    "services": {
+        "title_default": "Unsere Dienstleistungen",
+        "empty": "Dienstleistungen kommen bald"
+    },
+    "projects": {
+        "title": "Unsere Projekte",
+        "empty": "Projekte kommen bald"
+    },
+    "cta": {
+        "title": "Haben Sie Fragen, Vorschläge oder\nbenötigen Sie Hilfe bei Ihrem Projekt?",
+        "subtitle": "Kontaktieren Sie uns — wir antworten innerhalb von 15 Minuten und besprechen Ihre Aufgabe."
+    },
+    "admin": {
+        "dashboard": "Dashboard",
+        "projects": "Projekte",
+        "tasks": "Aufgaben",
+        "support": "Support",
+        "customers": "Kunden",
+        "warehouse": "Lager",
+        "terminal": "Terminal",
+        "times": "Zeiten",
+        "finance": "Finanzen",
+        "partners": "Partner",
+        "categories": "Kategorien",
+        "users": "Benutzer",
+        "content": "Inhalt",
+        "logout": "Abmelden"
+    }
+}

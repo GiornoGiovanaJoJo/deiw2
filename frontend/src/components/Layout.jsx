@@ -1,9 +1,41 @@
+import React, { useState } from 'react';
+import { Link, useLocation, Outlet } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import {
+    LayoutDashboard,
+    Users,
+    Box,
+    ClipboardList,
+    LogOut,
+    Menu,
+    X,
+    FileText,
+    Settings,
+    Briefcase
+} from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import LanguageSwitcher from './LanguageSwitcher';
 
-// ... imports
-
 export default function Layout() {
-    // ...
+    const { user, logout } = useAuth();
+    const location = useLocation();
+    const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
+    const isActive = (path) => location.pathname === path;
+
+    const navItems = [
+        { name: 'Dashboard', path: '/admin', icon: LayoutDashboard, roles: ['admin', 'manager', 'employee'] },
+        { name: 'Users', path: '/admin/users', icon: Users, roles: ['admin'] },
+        { name: 'Projects', path: '/admin/projects', icon: Briefcase, roles: ['admin', 'manager'] },
+        { name: 'Warehouse', path: '/admin/warehouse', icon: Box, roles: ['admin', 'manager', 'employee'] },
+        { name: 'Requests', path: '/admin/requests', icon: ClipboardList, roles: ['admin', 'manager'] },
+        { name: 'Reports', path: '/admin/reports', icon: FileText, roles: ['admin'] },
+        { name: 'Content Management', path: '/admin/content', icon: Settings, roles: ['admin'] },
+    ];
+
+    const filteredNavItems = navItems.filter(item =>
+        item.roles.includes(user?.role || 'employee')
+    );
 
     return (
         <div className="min-h-screen bg-slate-50 flex">

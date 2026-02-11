@@ -1,12 +1,172 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+    ThumbsUp,
+    Zap,
+    Heart,
+    ArrowRight,
+    ArrowLeft,
+} from 'lucide-react';
+import './Home.css';
+import { publicApi } from "@/api/public";
+import ServiceCard from "@/components/ServiceCard";
+import ProjectCard from "@/components/ProjectCard";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import ServiceModal from "@/components/ServiceModal";
+import HeroCarousel from "@/components/HeroCarousel";
 import { useTranslation } from 'react-i18next';
-// ... other imports
 
 export default function Home() {
     const { t } = useTranslation();
     const [scrolled, setScrolled] = useState(false);
-    // ... state
+    const [currentService, setCurrentService] = useState(0);
+    const [visibleServices, setVisibleServices] = useState(1);
+    const [heroContent, setHeroContent] = useState(null);
+    const [servicesContent, setServicesContent] = useState(null);
 
-    // ...
+    // Modal State
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Dynamic Data State
+    const [services, setServices] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Project Pagination
+    const [projectPage, setProjectPage] = useState(0);
+    const projectsPerPage = 3;
+
+    // Data Fetching
+    useEffect(() => {
+        const loadPublicData = async () => {
+            try {
+                const [cats, projs, heroData, servicesData] = await Promise.all([
+                    publicApi.getCategories().catch(err => {
+                        console.error("Error fetching categories:", err);
+                        return [];
+                    }),
+                    publicApi.getProjects().catch(err => {
+                        console.error("Error fetching projects:", err);
+                        return [];
+                    }),
+                    publicApi.getContent('home_hero').catch(err => null),
+                    publicApi.getContent('home_services').catch(err => null)
+                ]);
+
+                if (heroData) {
+                    setHeroContent(heroData.content);
+                }
+
+                if (servicesContent) {
+                    setServicesContent(servicesData.content);
+                }
+
+                if (cats && cats.length > 0) {
+                    setServices(cats);
+                } else {
+                    setServices([
+                        { id: 1, name: 'Жилое строительство', description: 'Строительство современных жилых комплексов и частных домов под ключ.', icon_name: 'home' },
+                        { id: 2, name: 'Коммерческая недвижимость', description: 'Офисные здания, торговые центры и складские помещения.', icon_name: 'building' },
+                        { id: 3, name: 'Реконструкция', description: 'Восстановление и модернизация существующих зданий.', icon_name: 'hammer' },
+                        { id: 4, name: 'Проектирование', description: 'Разработка архитектурных и инженерных проектов любой сложности.', icon_name: 'pen-tool' },
+                        { id: 5, name: 'Ландшафтный дизайн', description: 'Благоустройство территорий и создание уникальных ландшафтов.', icon_name: 'tree' }
+                    ]);
+                }
+
+                if (projs && projs.length > 0) {
+                    setProjects(projs);
+                } else {
+                    setProjects([
+                        { id: 'p1', name: 'Современный лофт', description: 'Ремонт квартиры в стиле лофт', status: 'Завершен', adresse: 'Москва, Центр' },
+                        { id: 'p2', name: 'Загородный дом', description: 'Строительство коттеджа под ключ', status: 'В процессе', adresse: 'Подмосковье' },
+                        { id: 'p3', name: 'Офис IT', description: 'Отделка офисного помещения', status: 'Завершен', adresse: 'Москва, Сити' },
+                    ]);
+                }
+            } catch (error) {
+                console.error("Failed to load public data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadPublicData();
+    }, []);
+
+    // Scroll effect for header
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Resize listener for services carousel
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth >= 1024) setVisibleServices(3);
+            else if (window.innerWidth >= 768) setVisibleServices(2);
+            else setVisibleServices(1);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Intersection Observer for animations
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        setTimeout(() => {
+            document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+        }, 500);
+
+        return () => observer.disconnect();
+    }, [services, projects]);
+
+    const scrollToSection = (id) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const handleNextService = () => {
+        const max = Math.max(0, services.length - visibleServices);
+        setCurrentService(curr => Math.min(curr + 1, max));
+    };
+
+    const handlePrevService = () => {
+        setCurrentService(curr => Math.max(curr - 1, 0));
+    };
+
+    // Project Pagination Handlers
+    const handleNextProjectPage = () => {
+        const maxPage = Math.ceil(projects.length / projectsPerPage) - 1;
+        setProjectPage(curr => Math.min(curr + 1, maxPage));
+    };
+
+    const handlePrevProjectPage = () => {
+        setProjectPage(curr => Math.max(curr - 1, 0));
+    };
+
+    const visibleProjects = projects.slice(
+        projectPage * projectsPerPage,
+        (projectPage + 1) * projectsPerPage
+    );
+
+    // Modal Handler
+    const handleServiceClick = (category) => {
+        setSelectedCategory(category);
+        setIsModalOpen(true);
+    };
 
     return (
         <div className="landing-page font-sans text-slate-900 bg-white">
@@ -24,6 +184,12 @@ export default function Home() {
                     <div className="container">
                         <div className="hero__content">
                             <h1 className="hero__title">
+                                {heroContent?.logo ? (
+                                    <img src={heroContent.logo} alt="Empire Premium" className="h-16 mb-4" />
+                                ) : (
+                                    <span className="hero__brand">Empire Premium</span>
+                                )}
+                                {!heroContent?.logo && " — "}
                                 <span className="hero__title-small">{heroContent?.title || t('hero.title_default')}</span>
                             </h1>
                             <p className="hero__subtitle">
@@ -50,7 +216,6 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="hero__visual">
-                            {/* ... visual content ... */}
                             <div className="hero__visual-inner" style={{ height: '130%' }}>
                                 <div className="hero__visual-placeholder h-full">
                                     {heroContent?.images && heroContent.images.length > 0 ? (
@@ -110,7 +275,6 @@ export default function Home() {
                             <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>
                         ) : (
                             <div className="relative">
-                                {/* ... carousel ... */}
                                 <div className="overflow-hidden p-2 -m-2">
                                     <div
                                         className="flex transition-transform duration-500 ease-in-out gap-6"
