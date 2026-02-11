@@ -17,6 +17,7 @@ import Subcontractors from '@/pages/Subcontractors';
 import Projects from '@/pages/Projects';
 import ProjectNew from '@/pages/ProjectNew';
 import ProjectDetailsAdmin from '@/pages/ProjectDetailsAdmin';
+import ProjectDetailsUser from '@/pages/ProjectDetailsUser';
 import Tasks from '@/pages/Tasks';
 import Support from '@/pages/Support';
 import ProductLogs from '@/pages/ProductLogs';
@@ -40,6 +41,7 @@ function App() {
 
           <Route path="/" element={<Home />} />
           <Route path="/projects/:id" element={<ProjectDetails />} />
+          <Route path="/my-projects/:id" element={<ProjectDetailsUser />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<Profile />} />

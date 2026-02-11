@@ -4,7 +4,14 @@ import { authApi } from '@/api/auth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, User } from "lucide-react";
+import { UserPlus, Mail, Lock, User, Building2, Phone, MapPin } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function Register() {
     const navigate = useNavigate();
@@ -14,13 +21,23 @@ export default function Register() {
         password: '',
         confirmPassword: '',
         firstName: '',
-        lastName: ''
+        lastName: '',
+        type: 'Firma', // Default to Company
+        company_name: '',
+        phone: '',
+        address: '',
+        zip_code: '',
+        city: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
+    };
+
+    const handleSelectChange = (value) => {
+        setFormData({ ...formData, type: value });
     };
 
     const handleSubmit = async (e) => {
@@ -38,7 +55,13 @@ export default function Register() {
                 email: formData.email,
                 password: formData.password,
                 first_name: formData.firstName,
-                last_name: formData.lastName
+                last_name: formData.lastName,
+                type: formData.type,
+                company_name: formData.type === 'Firma' ? formData.company_name : null,
+                phone: formData.phone,
+                address: formData.address,
+                zip_code: formData.zip_code,
+                city: formData.city
             });
 
             // On success, redirect to login
@@ -77,6 +100,30 @@ export default function Register() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
+
+                        <div className="space-y-2">
+                            <Label>Тип аккаунта</Label>
+                            <Select onValueChange={handleSelectChange} defaultValue={formData.type}>
+                                <SelectTrigger className="h-11 bg-slate-50 border-slate-200">
+                                    <SelectValue placeholder="Выберите тип" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Firma">Компания (Firma)</SelectItem>
+                                    <SelectItem value="Privat">Частное лицо (Privat)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {formData.type === 'Firma' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="company_name">Название компании</Label>
+                                <div className="relative">
+                                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                    <Input id="company_name" placeholder="Empire Premium GmbH" className="pl-10 h-11 bg-slate-50 border-slate-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]" onChange={handleChange} required />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="firstName">Имя</Label>
@@ -93,6 +140,32 @@ export default function Register() {
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                                 <Input id="email" type="email" placeholder="ivan@example.com" autoComplete="email" className="pl-10 h-11 bg-slate-50 border-slate-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]" onChange={handleChange} required />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="phone">Телефон</Label>
+                            <div className="relative">
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Input id="phone" type="tel" placeholder="+49 123 456789" autoComplete="tel" className="pl-10 h-11 bg-slate-50 border-slate-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]" onChange={handleChange} required />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="address">Адрес (Улица, Дом)</Label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                                <Input id="address" placeholder="Musterstraße 123" className="pl-10 h-11 bg-slate-50 border-slate-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]" onChange={handleChange} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="zip_code">PLZ</Label>
+                                <Input id="zip_code" placeholder="10115" className="h-11 bg-slate-50 border-slate-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]" onChange={handleChange} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="city">Город</Label>
+                                <Input id="city" placeholder="Berlin" className="h-11 bg-slate-50 border-slate-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]" onChange={handleChange} />
                             </div>
                         </div>
 

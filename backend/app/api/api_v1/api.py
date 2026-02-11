@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from app.api.api_v1.endpoints import (
     login, users, projects, tasks, categories, customers,
     products, product_logs, time_entries, cash_registers, cash_sales,
-    subcontractors, project_stages, documents, tickets, notes, comments, upload
+    subcontractors, project_stages, documents, tickets, notes, comments, upload, messages
 )
 
 
@@ -25,6 +25,7 @@ api_router.include_router(tickets.router, prefix="/tickets", tags=["tickets"])
 api_router.include_router(notes.router, prefix="/notes", tags=["notes"])
 api_router.include_router(comments.router, prefix="/comments", tags=["comments"])
 api_router.include_router(upload.router, prefix="/upload", tags=["upload"])
+api_router.include_router(messages.router, prefix="/messages", tags=["messages"])
 
 
 

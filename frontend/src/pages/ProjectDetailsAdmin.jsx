@@ -4,9 +4,12 @@ import { clientApi } from '@/api/client';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, MapPin, Coins, Users, User, FileText, Layers, Edit, Building2 } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Coins, Users, User, FileText, Layers, Edit, Building2, Send, MessageSquare } from "lucide-react";
 import ProjectStages from "@/components/project/ProjectStages";
 import ProjectDocuments from "@/components/project/ProjectDocuments";
+import { format } from 'date-fns';
+import { useAuth } from '@/context/AuthContext';
+import { Input } from "@/components/ui/input";
 
 export default function ProjectDetailsAdmin() {
     const { id } = useParams();
@@ -14,6 +17,100 @@ export default function ProjectDetailsAdmin() {
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("overview");
+    const { user } = useAuth();
+
+    // Chat States
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const messagesEndRef = React.useRef(null);
+
+    useEffect(() => {
+        if (activeTab === 'chat') {
+            loadMessages();
+        }
+    }, [activeTab]);
+
+    const loadMessages = async () => {
+        try {
+            const response = await clientApi.getMessages(id);
+            setMessages(response.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
+            scrollToBottom();
+        } catch (error) {
+            console.error("Failed to load messages", error);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim()) return;
+
+        try {
+            // Admin sending message in project chat.
+            // Recipient? The user (customer).
+            // If project.customer_id is set, use that user_id?
+            // Wait, Customer model links to User via email usually, or we need to find the User ID of the customer.
+            // Project has customer_id (int). Customer has email. User has email.
+            // We need to find User ID by email or if Customer has user_id.
+            // Models: Customer doesn't seem to have user_id derived directly in frontend Project object?
+            // We used `create_user_open` which makes User and Customer.
+            // If we didn't store user_id in Customer, we assume email match.
+            // Admin message recipient is arguably the Client User.
+            // Let's rely on backend: if project_id is set, maybe recipient_id is less distinct if it's a "room"?
+            // But our model enforces recipient_id.
+            // We need to know who we are talking to.
+            // Determine recipient: Project Customer?
+            // If project has customer, we need their User ID.
+            // Limitation: We might not have User ID of customer in `project` response easily if not joined.
+            // Let's assume for now we can get it or we broadcast?
+            // "project_id" in message might allow recipient_id to be null in future, but schema says int.
+            // Let's try to find the User who owns this project (Customer).
+            // Backend `read_project` includes `customer`. `Customer` has `email`.
+            // We might need to look up User by email or assume we can reply to the last message sender if exists.
+
+            // Fallback: If messages exist, reply to the other person.
+            // If no messages, we need to know who to start with.
+            // For now, let's try to get it from `project.customer`. 
+            // We might need `clientApi.getUserByEmail(project.customer.email)` or similar?
+            // Or `project` might include `customer_user_id` if we modify return.
+
+            // Simplest hack: Reply to `messages[0].sender_id` if `messages[0].sender_id != user.id`.
+
+            let recipientId = null;
+            if (messages.length > 0) {
+                const otherMsg = messages.find(m => m.sender_id !== user.id);
+                if (otherMsg) recipientId = otherMsg.sender_id;
+            }
+
+            // If no messages yet, Admin cannot start chat easily without knowing User ID.
+            // This is a known limitation request.
+            // Let's add a TODO or alert if unknown.
+
+            if (!recipientId && project.customer) {
+                // Try to find user by customer email? Not available in clientApi yet.
+                // Assuming we can't send.
+                alert("Kann keine Nachricht senden: Empfänger nicht gefunden (Keine vorherigen Nachrichten).");
+                return;
+            }
+
+            if (!recipientId) return;
+
+            const res = await clientApi.sendMessage({
+                recipient_id: recipientId,
+                project_id: parseInt(id),
+                content: newMessage
+            });
+
+            setMessages(prev => [...prev, res.data]);
+            setNewMessage('');
+            scrollToBottom();
+        } catch (error) {
+            console.error("Failed to send message", error);
+        }
+    };
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     useEffect(() => {
         loadProject();
@@ -62,7 +159,7 @@ export default function ProjectDetailsAdmin() {
             {/* Tabs Navigation */}
             <div className="border-b border-slate-200">
                 <nav className="flex space-x-8" aria-label="Tabs">
-                    {['overview', 'stages', 'documents', 'team'].map((tab) => (
+                    {['overview', 'stages', 'documents', 'team', 'chat'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -77,6 +174,7 @@ export default function ProjectDetailsAdmin() {
                             {tab === 'stages' && 'Phasen & Zeitplan'}
                             {tab === 'documents' && 'Dokumente'}
                             {tab === 'team' && 'Team & Partner'}
+                            {tab === 'chat' && 'Kommunikation'}
                         </button>
                     ))}
                 </nav>
@@ -235,6 +333,59 @@ export default function ProjectDetailsAdmin() {
                                         ))
                                     ) : <p className="text-slate-500 text-sm">Keine Subunternehmer</p>}
                                 </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {activeTab === 'chat' && (
+                    <Card className="h-[600px] flex flex-col">
+                        <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                                    <MessageSquare className="w-5 h-5 text-slate-500" />
+                                </div>
+                                <div>
+                                    <CardTitle>Projekt-Kommunikation</CardTitle>
+                                    <p className="text-xs text-slate-500">Chatverlauf für dieses Projekt</p>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+                            <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/30">
+                                {messages.length === 0 && (
+                                    <div className="text-center text-slate-400 py-10">
+                                        Keine Nachrichten vorhanden.
+                                    </div>
+                                )}
+                                {messages.map((msg) => {
+                                    const isMe = msg.sender_id === user.id;
+                                    return (
+                                        <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[75%] rounded-2xl p-4 shadow-sm ${isMe ? 'bg-[#7C3AED] text-white rounded-tr-none' : 'bg-white border border-slate-200 rounded-tl-none'}`}>
+                                                <p className="text-sm">{msg.content}</p>
+                                                <p className={`text-[10px] mt-1 text-right ${isMe ? 'text-violet-200' : 'text-slate-400'}`}>
+                                                    {format(new Date(msg.timestamp), 'dd.MM.yyyy HH:mm')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                <div ref={messagesEndRef} />
+                            </div>
+
+                            <div className="p-4 bg-white border-t border-slate-100">
+                                <form onSubmit={handleSendMessage} className="flex gap-3">
+                                    <Input
+                                        value={newMessage}
+                                        onChange={e => setNewMessage(e.target.value)}
+                                        placeholder="Nachricht schreiben..."
+                                        className="flex-1"
+                                    />
+                                    <Button type="submit" size="icon" className="bg-[#7C3AED] hover:bg-[#6D28D9]">
+                                        <Send className="w-4 h-4" />
+                                    </Button>
+                                </form>
                             </div>
                         </CardContent>
                     </Card>

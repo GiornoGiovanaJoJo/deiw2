@@ -69,7 +69,7 @@ def create_user_open(
     user_in: UserCreate,
 ) -> Any:
     """
-    Create new user without logged in.
+    Create new user without logged in. Only for Clients.
     """
     if not settings.USERS_OPEN_REGISTRATION:
         raise HTTPException(
@@ -82,17 +82,36 @@ def create_user_open(
             status_code=400,
             detail="The user with this username already exists in the system",
         )
+    
+    # Create User
     user = User(
         email=user_in.email,
         hashed_password=security.get_password_hash(user_in.password),
         first_name=user_in.first_name,
         last_name=user_in.last_name,
-        role="Worker", # Default role
+        role="Kunde", # Default role for self-registration
         is_superuser=False,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
+    
+    # Create associated Customer record
+    from app.models.customer import Customer
+    customer = Customer(
+        type=user_in.type,
+        company_name=user_in.company_name,
+        contact_person=user_in.contact_person or f"{user_in.first_name} {user_in.last_name}",
+        email=user_in.email,
+        phone=user_in.phone,
+        address=user_in.address,
+        zip_code=user_in.zip_code,
+        city=user_in.city,
+        status="Aktiv"
+    )
+    db.add(customer)
+    db.commit()
+    
     return user
 
 @router.put("/me", response_model=UserSchema)

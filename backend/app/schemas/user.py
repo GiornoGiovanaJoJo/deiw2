@@ -16,6 +16,14 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     email: EmailStr
     password: str
+    # Customer registration fields
+    type: Optional[str] = "Firma"
+    company_name: Optional[str] = None
+    contact_person: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    zip_code: Optional[str] = None
+    city: Optional[str] = None
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):

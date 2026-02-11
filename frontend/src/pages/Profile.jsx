@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, User, Search, Settings, FileText, HelpCircle } from "lucide-react";
+import { LogOut, User, Search, Settings, FileText, HelpCircle, Send } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { clientApi } from '@/api/client'; // New client API
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import './Home.css';
+import { format } from 'date-fns';
 
 export default function Profile() {
     const { user, logout, checkUserAuth } = useAuth();
@@ -18,6 +19,11 @@ export default function Profile() {
     const [orders, setOrders] = useState([]);
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Chat States
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const messagesEndRef = useRef(null);
 
     // Filter States
     const [statusFilter, setStatusFilter] = useState('');
@@ -47,8 +53,12 @@ export default function Profile() {
                 email: user.email || '',
                 password: ''
             });
+
+            if (activeTab === 'support') {
+                loadMessages();
+            }
         }
-    }, [user, navigate]);
+    }, [user, navigate, activeTab]);
 
     const loadClientData = async () => {
         try {
@@ -63,6 +73,48 @@ export default function Profile() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const loadMessages = async () => {
+        try {
+            const res = await clientApi.getMessages();
+            // Sort by timestamp asc
+            const sorted = res.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            setMessages(sorted);
+            scrollToBottom();
+        } catch (error) {
+            console.error("Failed to load messages", error);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim()) return;
+
+        try {
+            // Helper to determine recipient. For a user, they message the 'System' or 'Support'.
+            // Current backend implementation of sendMessage takes recipient_id.
+            // We need a way to know WHO is the support admin.
+            // For now, let's assume Admin ID is 1 or we need a specific 'Support' user.
+            // OR we can make the backend handle 'support' keyword?
+            // Let's assume ID 1 is the main admin for now.
+            // TODO: Better way to find support admin ID.
+            const ADMIN_ID = 1;
+
+            await clientApi.sendMessage({
+                recipient_id: ADMIN_ID,
+                content: newMessage
+            });
+            setNewMessage('');
+            loadMessages();
+        } catch (error) {
+            console.error("Failed to send message", error);
+            alert("Fehler beim Senden der Nachricht.");
+        }
+    };
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     const handleUpdateProfile = async () => {
@@ -196,14 +248,14 @@ export default function Profile() {
                                     <div className="text-center py-8 text-slate-500">Заказов не найдено.</div>
                                 )}
                                 {filteredOrders.map((order) => (
-                                    <div key={order.id} className="bg-[#F8F7FF] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:shadow-md transition-shadow cursor-pointer">
+                                    <div key={order.id} onClick={() => navigate(`/my-projects/${order.id}`)} className="bg-[#F8F7FF] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:shadow-md transition-shadow cursor-pointer">
                                         <div className="space-y-4 flex-1">
                                             <div className="font-bold text-slate-900 text-lg">{order.status}</div>
                                             <div>
                                                 <h3 className="font-bold text-xl text-slate-900 mb-2">{order.name}</h3>
                                                 <div className="text-slate-500 text-sm space-y-1">
                                                     <p>Категория заказа: {order.category?.name || "Общее"}</p>
-                                                    <p>Номер заказа: {order.project_code || order.id}</p>
+                                                    <p>Номер заказа: {order.projekt_nummer || order.id}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -325,12 +377,53 @@ export default function Profile() {
                     )}
 
                     {activeTab === 'support' && (
-                        <div className="text-center py-20">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-4">Поддержка</h2>
-                            <p className="text-slate-500">Свяжитесь с нами: support@empire-premium.de</p>
-                            <a href="mailto:support@empire-premium.de" className="text-[#7C3AED] font-medium mt-4 inline-block">
-                                Написать письмо
-                            </a>
+                        <div className="space-y-8 h-[600px] flex flex-col">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-bold text-slate-900">Чат с поддержкой</h2>
+                                <a href="mailto:support@empire-premium.de" className="text-sm text-slate-500 hover:text-[#7C3AED]">
+                                    Alternative: Email
+                                </a>
+                            </div>
+
+                            <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+                                {/* Chat Area */}
+                                <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/50">
+                                    {messages.length === 0 && (
+                                        <div className="text-center text-slate-400 py-10">
+                                            Напишите нам, если у вас возникли вопросы.
+                                        </div>
+                                    )}
+                                    {messages.map((msg) => {
+                                        const isMe = msg.sender_id === user.id;
+                                        return (
+                                            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                                <div className={`max-w-[70%] rounded-2xl p-4 ${isMe ? 'bg-[#7C3AED] text-white' : 'bg-white border border-slate-200'}`}>
+                                                    <p className="text-sm">{msg.content}</p>
+                                                    <p className={`text-[10px] mt-1 ${isMe ? 'text-violet-200' : 'text-slate-400'}`}>
+                                                        {format(new Date(msg.timestamp), 'dd.MM.yyyy HH:mm')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                {/* Input Area */}
+                                <div className="p-4 bg-white border-t border-slate-100">
+                                    <form onSubmit={handleSendMessage} className="flex gap-3">
+                                        <Input
+                                            value={newMessage}
+                                            onChange={e => setNewMessage(e.target.value)}
+                                            placeholder="Введите сообщение..."
+                                            className="flex-1"
+                                        />
+                                        <Button type="submit" size="icon" className="bg-[#7C3AED] hover:bg-[#6D28D9]">
+                                            <Send className="w-4 h-4" />
+                                        </Button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </main>

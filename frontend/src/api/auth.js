@@ -23,3 +23,18 @@ export const authApi = {
         return api.get('/users/me');
     }
 };
+
+export const clientApi = {
+    // ... existing methods ...
+    getMessages: async (projectId = null) => {
+        const query = projectId ? `?project_id=${projectId}` : '';
+        return api.get(`/messages/${query}`);
+    },
+    sendMessage: async (data) => {
+        return api.post('/messages/', data);
+    },
+    getConversation: async (userId) => {
+        return api.get(`/messages/conversation/${userId}`);
+    }
+};
+
